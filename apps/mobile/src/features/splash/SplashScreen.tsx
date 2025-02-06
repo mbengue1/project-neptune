@@ -1,45 +1,49 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStyles } from '../../themes/styles';
 
 type RootStackParamList = {
   Splash: undefined;
+  Welcome: undefined;
   Login: undefined;
   Signup: undefined;
 };
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
+type Props = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Splash'>;
+};
 
-export const SplashScreen = () => {
-  const navigation = useNavigation<NavigationProp>();
-
+export const SplashScreen = ({ navigation }: Props) => {
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.navigate('Login'); // Redirect after 2 seconds
+      navigation.navigate('Welcome');
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [navigation]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>NEPTUNE</Text>
+    <View style={[AppStyles.container, styles.container]}>
+      <Text style={styles.title}>Neptune</Text>
+      <Text style={styles.subtitle}>Sportsbook</Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#1A1A1A',
     justifyContent: 'center',
     alignItems: 'center',
   },
   title: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: 2,
+    color: '#4A90E2',
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#333333',
+    marginTop: 8,
   },
 });

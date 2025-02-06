@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import { AppStyles } from '../../themes/styles';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type RootStackParamList = {
+  Splash: undefined;
+  Welcome: undefined;
   Login: undefined;
   Signup: undefined;
 };
@@ -14,79 +17,56 @@ type Props = {
 export const SignupScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Create Account</Text>
+    <View style={AppStyles.container}>
+      <Text style={AppStyles.header}>Create Account</Text>
+      <Text style={styles.subheader}>Create an account to explore the Sportsbook.</Text>
 
       <TextInput
         placeholder="Email"
-        placeholderTextColor="#666"
+        placeholderTextColor="#999999"
         value={email}
         onChangeText={setEmail}
-        style={styles.input}
+        style={AppStyles.input}
         keyboardType="email-address"
-        autoCapitalize="none"
       />
 
       <TextInput
         placeholder="Password"
-        placeholderTextColor="#666"
+        placeholderTextColor="#999999"
         value={password}
         onChangeText={setPassword}
-        style={styles.input}
+        style={AppStyles.input}
         secureTextEntry
       />
 
-      <Pressable style={styles.primaryButton}>
-        <Text style={styles.buttonText}>Continue</Text>
+      <TextInput
+        placeholder="Confirm Password"
+        placeholderTextColor="#999999"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        style={AppStyles.input}
+        secureTextEntry
+      />
+
+      <Pressable style={AppStyles.button}>
+        <Text style={AppStyles.buttonText}>Sign Up</Text>
       </Pressable>
 
       <Pressable onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.linkText}>Already have an account? Sign In</Text>
+        <Text style={AppStyles.linkText}>Already have an account? Sign In</Text>
       </Pressable>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1A1A1A',
-    padding: 24,
-    justifyContent: 'center',
-  },
-  header: {
-    fontSize: 24,
-    color: '#FFFFFF',
-    fontWeight: '700',
-    marginBottom: 40,
-    textAlign: 'center',
-  },
-  input: {
-    backgroundColor: '#2E2E2E',
-    color: '#FFFFFF',
+  subheader: {
     fontSize: 16,
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  primaryButton: {
-    backgroundColor: '#4A90E2',
-    padding: 18,
-    borderRadius: 8,
-    marginVertical: 24,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  linkText: {
-    color: '#4A90E2',
+    color: '#666666',
     textAlign: 'center',
-    marginTop: 12,
-    fontSize: 14,
+    marginBottom: 32,
   },
 });
