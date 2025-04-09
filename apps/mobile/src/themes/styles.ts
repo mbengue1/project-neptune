@@ -1,40 +1,44 @@
-import { LightColors } from './colors';
-import { Typography } from './typography';
 import { StyleSheet } from 'react-native';
+import { Colors } from './colors';
+import { Typography } from './typography';
 
 export const AppStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: LightColors.background,
+    backgroundColor: Colors.background,
     padding: 24,
   },
   header: {
-    ...Typography.header,
-    color: LightColors.text,
-    marginBottom: 32,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.primary,
     textAlign: 'center',
   },
   input: {
-    backgroundColor: LightColors.inputBackground,
-    color: LightColors.text,
-    fontSize: 16,
-    padding: 16,
+    backgroundColor: Colors.inputBackground,
     borderRadius: 8,
-    marginBottom: 16,
+    padding: 16,
+    fontSize: 16,
+    color: Colors.textPrimary,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  inputFocused: {
+    borderColor: Colors.primary,
   },
   button: {
-    backgroundColor: '#4A90E2',
-    padding: 18,
+    backgroundColor: Colors.buttonBackground,
     borderRadius: 8,
-    alignItems: 'center' as const,
+    padding: 16,
+    alignItems: 'center',
   },
   buttonText: {
-    ...Typography.button,
-    color: '#FFFFFF',
+    color: Colors.buttonText,
+    fontSize: 16,
+    fontWeight: '600',
   },
   linkText: {
-    ...Typography.link,
+    color: Colors.link,
     textAlign: 'center',
-    marginTop: 12,
   },
 });

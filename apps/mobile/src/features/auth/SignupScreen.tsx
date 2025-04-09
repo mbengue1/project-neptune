@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable } from 'react-native';
 import { AppStyles } from '../../themes/styles';
+import { Colors } from '../../themes/colors';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
+import { styles } from './SignupScreen.styles';
 
 type RootStackParamList = {
   Splash: undefined;
@@ -20,53 +23,60 @@ export const SignupScreen = ({ navigation }: Props) => {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   return (
-    <View style={AppStyles.container}>
-      <Text style={AppStyles.header}>Create Account</Text>
-      <Text style={styles.subheader}>Create an account to explore the Sportsbook.</Text>
+    <View style={[AppStyles.container, styles.container]}>
+      <View style={styles.contentContainer}>
+        <Text style={styles.title}>Create Account</Text>
+        <Text style={styles.subheader}>Create an account so you can explore the available Sportsbook.</Text>
 
-      <TextInput
-        placeholder="Email"
-        placeholderTextColor="#999999"
-        value={email}
-        onChangeText={setEmail}
-        style={AppStyles.input}
-        keyboardType="email-address"
-      />
+        <TextInput
+          placeholder="Email"
+          placeholderTextColor={Colors.textLight}
+          value={email}
+          onChangeText={setEmail}
+          style={[AppStyles.input, styles.input]}
+          keyboardType="email-address"
+        />
 
-      <TextInput
-        placeholder="Password"
-        placeholderTextColor="#999999"
-        value={password}
-        onChangeText={setPassword}
-        style={AppStyles.input}
-        secureTextEntry
-      />
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor={Colors.textLight}
+          value={password}
+          onChangeText={setPassword}
+          style={[AppStyles.input, styles.input]}
+          secureTextEntry
+        />
 
-      <TextInput
-        placeholder="Confirm Password"
-        placeholderTextColor="#999999"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        style={AppStyles.input}
-        secureTextEntry
-      />
+        <TextInput
+          placeholder="Confirm Password"
+          placeholderTextColor={Colors.textLight}
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          style={[AppStyles.input, styles.input]}
+          secureTextEntry
+        />
 
-      <Pressable style={AppStyles.button}>
-        <Text style={AppStyles.buttonText}>Sign Up</Text>
-      </Pressable>
+        <Pressable style={[AppStyles.button, styles.button]}>
+          <Text style={AppStyles.buttonText}>Sign up</Text>
+        </Pressable>
 
-      <Pressable onPress={() => navigation.navigate('Login')}>
-        <Text style={AppStyles.linkText}>Already have an account? Sign In</Text>
-      </Pressable>
+        <Text style={styles.orText}>Or continue with</Text>
+
+        <View style={styles.socialButtons}>
+          <Pressable style={styles.socialButton}>
+            <Ionicons name="logo-google" size={22} color={Colors.socialButtonIcon} />
+          </Pressable>
+          <Pressable style={styles.socialButton}>
+            <Ionicons name="logo-facebook" size={22} color={Colors.socialButtonIcon} />
+          </Pressable>
+          <Pressable style={styles.socialButton}>
+            <Ionicons name="logo-apple" size={22} color={Colors.socialButtonIcon} />
+          </Pressable>
+        </View>
+
+        <Pressable onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.alreadyHaveAccount}>Already have an account</Text>
+        </Pressable>
+      </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  subheader: {
-    fontSize: 16,
-    color: '#666666',
-    textAlign: 'center',
-    marginBottom: 32,
-  },
-});
