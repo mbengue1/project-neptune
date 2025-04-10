@@ -1,6 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
 import { Colors } from '../../themes/colors';
-import { poppins } from '../../utils/fonts';
 
 const { height, width } = Dimensions.get('window');
 
@@ -33,15 +32,15 @@ export const styles = StyleSheet.create({
   },
   title: {
     fontSize: 36,
-    fontFamily: poppins.extraBold,
+    fontFamily: 'Poppins-ExtraBold',
     color: Colors.primary,
-    marginBottom: 16,
+    marginBottom: 20,
     textAlign: 'center',
     letterSpacing: 0.5,
   },
   subheader: {
     fontSize: 18,
-    fontFamily: poppins.regular,
+    fontFamily: 'Poppins-Regular',
     color: '#000000',
     textAlign: 'center',
     marginBottom: 40,
@@ -55,7 +54,7 @@ export const styles = StyleSheet.create({
     color: Colors.link,
     textAlign: 'right',
     marginBottom: 24,
-    fontFamily: poppins.regular,
+    fontFamily: 'Poppins-Regular',
   },
   button: {
     marginBottom: 24,
@@ -71,7 +70,7 @@ export const styles = StyleSheet.create({
     color: Colors.primary,
     marginBottom: 16,
     marginTop: 16,
-    fontFamily: poppins.medium,
+    fontFamily: 'Poppins-Medium',
     fontSize: 16,
   },
   socialButtons: {
@@ -96,7 +95,7 @@ export const styles = StyleSheet.create({
   createAccount: {
     color: '#000000',
     textAlign: 'center',
-    fontFamily: poppins.semiBold,
+    fontFamily: 'Poppins-SemiBold',
     fontSize: 16,
   },
 });
