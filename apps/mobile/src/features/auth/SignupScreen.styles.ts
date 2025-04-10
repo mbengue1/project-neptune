@@ -1,39 +1,72 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { Colors } from '../../themes/colors';
+import { poppins } from '../../utils/fonts';
+
+const { height, width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
   container: {
+    flex: 1,
     paddingHorizontal: 20,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: height * 0.08,
+    paddingBottom: height * 0.05,
   },
   contentContainer: {
     width: '100%',
     maxWidth: 400,
     alignSelf: 'center',
+    minHeight: height * 0.85,
+    justifyContent: 'space-between',
+  },
+  topSection: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  middleSection: {
+    width: '100%',
+    marginTop: height * 0.02,
+  },
+  bottomSection: {
+    width: '100%',
+    marginTop: height * 0.05,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 36,
+    fontFamily: poppins.extraBold,
     color: Colors.primary,
-    marginBottom: 8,
+    marginBottom: 16,
     textAlign: 'center',
+    letterSpacing: 0.5,
   },
   subheader: {
-    fontSize: 16,
-    color: Colors.textSecondary,
+    fontSize: 18,
+    fontFamily: poppins.regular,
+    color: '#000000',
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 40,
+    maxWidth: '80%',
   },
   input: {
-    marginBottom: 16,
+    marginBottom: 24,
+    height: 60,
   },
   button: {
     marginBottom: 24,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+    height: 56,
   },
   orText: {
     textAlign: 'center',
-    color: Colors.textSecondary,
+    color: Colors.primary,
     marginBottom: 16,
+    marginTop: 16,
+    fontFamily: poppins.medium,
+    fontSize: 16,
   },
   socialButtons: {
     flexDirection: 'row',
@@ -55,7 +88,9 @@ export const styles = StyleSheet.create({
     elevation: 2,
   },
   alreadyHaveAccount: {
-    color: Colors.link,
+    color: '#000000',
     textAlign: 'center',
+    fontFamily: poppins.semiBold,
+    fontSize: 16,
   },
 });

@@ -1,7 +1,7 @@
 export const Colors = {
   // Brand colors
-  primary: '#36f',        // Main blue color
-  secondary: '#4A90E2',   // Secondary blue
+  primary: '#1F41BB',        // Updated main blue color
+  secondary: '#1F41BB',      // Now matches primary
 
   // Text colors
   textPrimary: '#333333',
@@ -13,7 +13,7 @@ export const Colors = {
   inputBackground: '#F5F5F5',
   
   // Button colors
-  buttonBackground: '#36f',
+  buttonBackground: '#1F41BB', // Updated to match primary
   buttonText: '#FFFFFF',
 
   // Social button colors
@@ -29,7 +29,7 @@ export const Colors = {
   border: '#E5E5E5',
 
   // Link colors
-  link: '#36f',
+  link: '#1F41BB', // Updated to match primary
 };
 
 // You can also create specific theme variations if needed
