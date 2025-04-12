@@ -1,263 +1,163 @@
-# AI-Driven Sports Betting Application — Reference Documentation - https://neptune-land.netlify.app/
+# AI‑Driven Sports Betting Application — Reference Documentation
 
-## Table of Contents
-1. [High-Level Architecture](#high-level-architecture)  
-2. [Why a Hybrid Microservices Approach?](#why-a-hybrid-microservices-approach)  
-3. [Detailed Microservices Design](#detailed-microservices-design)  
-    - [API Gateway](#a-api-gateway)  
-    - [Auth & User Service](#b-auth--user-service)  
-    - [Betting Engine](#c-betting-engine)  
-    - [Payment/Transaction Service](#d-paymenttransaction-service)  
-    - [AI/ML Service](#e-aiml-service)  
-    - [Chat/LLM Service](#f-chatllm-service)  
-    - [Data Ingestion Service](#g-data-ingestion-service)  
-4. [Infrastructure & Deployment](#infrastructure--deployment)  
-    - [Containers](#a-containers)  
-    - [Serverless Components](#b-serverless-components)  
-    - [Message Broker / Event Bus](#c-message-broker--event-bus)  
-    - [CI/CD](#d-cicd)  
-5. [Observability & Monitoring](#observability--monitoring)  
-6. [Security & Compliance](#security--compliance)  
-7. [Step-by-Step Development Strategy](#step-by-step-development-strategy)  
+Welcome to the **Neptune AI Sportsbook** project!  This repository contains the reference architecture, design rationale, and implementation guidelines for building a **cloud‑native, AI‑powered sports‑betting platform** that is secure, compliant, and ready to scale globally.
+
+> **Live Landing page:** <https://neptune-land.netlify.app/>
 
 ---
 
-## High-Level Architecture
+## Table of Contents
+1. [High‑Level Architecture](#high-level-architecture)  
+2. [Why a Hybrid Microservices Approach?](#why-a-hybrid-microservices-approach)  
+3. [Detailed Microservices Design](#detailed-microservices-design)  
+4. [Infrastructure & Deployment](#infrastructure--deployment)  
+5. [Observability & Monitoring](#observability--monitoring)  
+6. [Security & Compliance](#security--compliance)  
+7. [Step‑by‑Step Development Strategy](#step-by-step-development-strategy)  
+8. [Responsible Gambling & Ethics](#responsible-gambling--ethics)  
+9. [Future Roadmap](#future-roadmap)  
+10. [Contributing](#contributing)  
 
-A typical microservices setup for an **AI-driven sports betting application** may include:
+---
 
-- **API Gateway / Reverse Proxy**:  
-  - Single entry point for routing requests (e.g., Kong, NGINX, AWS API Gateway, or Istio on Kubernetes).
-- **Authentication & User Management Service**:  
-  - Handles user registration, login, profile management, and KYC.
-  - Stores user details, sessions, permissions.
-- **Betting Engine Service**:  
-  - Handles betting logic, bet placement, outcomes, odds updates, and transaction logic.
-- **Payments/Transactions Service**:  
-  - Integrates with payment gateways (Stripe, PayPal, etc.) for deposits/withdrawals.
-  - Manages user balances and transaction history.
-- **AI/ML Service**:  
-  - Provides predictions, recommended bets, personalized suggestions.
-  - Commonly built with Python (FastAPI/Flask) for data science tasks.
-- **Chat/Recommendation Service (LLM)**:  
-  - Handles conversational AI features, possibly integrated with large language models (LLMs).
-- **Sports Data Ingestion Service (Optional)**:  
-  - Pulls data from external providers (e.g., Sportradar), normalizes, and publishes to internal services.
+## High‑Level Architecture
 
-### Frontend & Databases
-- **Frontends**: Mobile apps (iOS/Android with React Native, Flutter) and web apps (React, Vue, Angular).
-- **Databases & Storage**:
-  - **Relational DB** (e.g., PostgreSQL, MySQL) for user, transaction, bet records.
-  - **NoSQL** (e.g., MongoDB, DynamoDB) for high-volume logs or flexible documents.
-  - **In-memory Cache** (e.g., Redis) for fast retrieval of odds, live event data.
-  - **Data Warehouse/Lake** (e.g., Snowflake, BigQuery, S3-based) for historical analytics and training data.
+A modern sportsbook must **react to live events in milliseconds**, keep user funds safe, and deliver personalized insights.  Our architecture embraces:
+
+* **Event‑Driven Microservices** — decoupled services communicate via a message bus, ensuring resilience and horizontal scalability.
+* **AI‑Enhanced Decision Making** — predictive models continuously ingest real‑time sports feeds to generate dynamic odds and user‑specific recommendations.
+* **Hybrid Compute** — containerized services run on Kubernetes for always‑on workloads, while serverless functions handle bursty or scheduled jobs such as nightly reports or promotional e‑mails.
+
+<details>
+<summary>Click to view component diagram</summary>
+
+![Architecture Diagram](./docs/architecture-diagram.png)
+
+</details>
+
+> **Tip:** The diagram is generated with [Diagrams.net](https://www.diagrams.net/); edit the XML file under `docs/` and push to regenerate.
 
 ---
 
 ## Why a Hybrid Microservices Approach?
 
-1. **Autonomous Scalability**  
-   - Each service scales independently; AI might need GPUs, betting engine might need high CPU concurrency.
+1. **Autonomous Scalability** — Services that perform GPU‑heavy inference (AI/ML) scale independently from the transaction‑heavy betting engine.
+2. **Polyglot Freedom** — Teams choose the best language for the job: Python for data science, Go for high‑throughput bet settlement, Node.js for real‑time websockets.
+3. **Blast‑Radius Isolation** — A failure in the chat service cannot impact payment processing.
+4. **Cost Efficiency** — Serverless tasks (e.g., sending daily risk reports) incur zero cost when idle.
 
-2. **Technology Tailoring**  
-   - Python for data science, Node.js for real-time connections, or Go for performance-critical components.
-
-3. **Isolation & Reliability**  
-   - Service failures do not bring down the entire system.
-
-4. **Serverless Opportunities**  
-   - Event-driven tasks (notifications, daily stats) can be handled by AWS Lambda / GCP Functions, reducing overhead.
+> **Alternatives considered:** A monolith was rejected due to limited elasticity, and fully serverless was deemed impractical for long‑running websocket sessions.
 
 ---
 
 ## Detailed Microservices Design
 
-### A. API Gateway
-- **Routes**:
-  - `/auth/*` → Auth Service  
-  - `/users/*` → User Management  
-  - `/bets/*` → Betting Engine  
-  - `/payments/*` → Payments  
-  - `/ai/*` → AI/ML Service  
-  - `/chat/*` → Chat/LLM Service
+*(The following expands on the original outline with typical tech‑stack choices and data contracts.)*
 
-- **Security**:
-  - JWT or session token validation.
-  - Rate limiting (particularly important for LLM endpoints).
-  - CORS policies for web clients.
+### A. API Gateway
+* **Recommended Tooling:**  Kong or AWS API Gateway + Lambda authorizers.
+* **Cross‑Cutting Concerns:**  rate‑limiting, JWT validation, and synthetic monitoring probes.
 
 ### B. Auth & User Service
-- **Auth Flows**:
-  - JWT-based or OAuth2.
-  - Email/password, social logins (Google, Apple), etc.
-
-- **Database**:
-  - Relational table: `users(id, email, hashed_password, balance, ...)`.
-  - Possibly a `user_activity_logs` table for KYC references and user actions.
-
-- **Implementation**:
-  - Node.js (Express/NestJS), Go, or .NET commonly used.
+* **Zero‑Trust Posture:**  every request is authenticated, even internal gRPC calls.
+* **KYC Pipeline:**  integrates with SumSub or Onfido via an async webhook; user state transitions from `pending` → `verified` → `restricted`.
 
 ### C. Betting Engine
-- **Core Functions**:
-  - List sports/teams/matches with odds.
-  - Place bets (bet tickets), track outcomes.
-  - Settle bets (update user balances).
-  
-- **Data Flow**:
-  - Consumes real-time odds from Ingestion service or external API.
-  - Publishes bet outcomes to queue for asynchronous processing.
-
-- **Performance**:
-  - High concurrency expected around events. Horizontal scaling is critical.
+* **Atomicity:**  bets are stored using a *double‑entry ledger* pattern to guarantee that every stake has a balancing liability.
+* **Hot Path Optimizations:**  odds caches in Redis with pub/sub invalidation keep latency <10 ms.
 
 ### D. Payment/Transaction Service
-- **Integrations**:
-  - Payment gateways (Stripe, PayPal, etc.).
-  - Crypto payments may require a separate wallet service.
-
-- **Workflow**:
-  - **Deposit** → gateway call → update user’s balance.
-  - **Withdrawal** → KYC check → gateway call → update ledger → notify user.
-
-- **Security**:
-  - PCI-DSS compliance if handling card data.
-  - Use tokenization to avoid storing raw card details.
+* **Ledger Database:**  PostgreSQL with serializable isolation; every transaction is immutable and auditable.
+* **Withdrawal Orchestration:**  Saga pattern coordinates KYC check → fraud scoring → payout execution.
 
 ### E. AI/ML Service
-- **Sub-components**:
-  - **Model Inference**: Predictive analytics for outcomes, performance, recommended bets.
-  - **Data Processing**: Historical data prepping, possibly offline training jobs.
-
-- **Endpoints**:
-  - `POST /predict` with match data, stats, etc.
-  - `POST /recommend` for recommended bets.
-
-- **Model Deployment**:
-  - Typically Python-based (FastAPI, Flask, Gunicorn).
-  - May use managed solutions like AWS Sagemaker or GCP AI Platform.
-
-- **Caching**:
-  - For frequently repeated inferences, store results to avoid recomputation.
+* **Model Registry:**  MLflow stores versioned models and metrics; Canary deployments route 5 % of traffic to new models.
+* **Feature Store:**  Feast on BigQuery provides offline/online parity.
 
 ### F. Chat/LLM Service
-- **Approaches**:
-  - **Self-Hosted**: More control, but requires GPU infra.
-  - **Third-Party API**: (OpenAI, Anthropic, etc.) Quicker setup but less control.
-
-- **Functionality**:
-  - `POST /chat` with user query + context (game info, user preferences).
-
-- **Rate Limiting & Costs**:
-  - Chat can be a big cost driver; implement usage tracking, caching, or membership tiers.
+* **Prompt Engineering Gateway:**  a thin Python layer injects user context (favorite teams, bankroll) before calling the LLM.
+* **Guardrails:**  OpenAI function calling and semantic filters block disallowed content or wagering advice for underage users.
 
 ### G. Data Ingestion Service
-- **Task**:
-  - Fetch/subscribe to external sports data (e.g., Sportradar).
-  - Parse, normalize, store in DB/cache.
-  - Publish real-time updates to Betting Engine (queue or direct push).
-
-- **Serverless Option**:
-  - If on a schedule or event-driven, can use AWS Lambda / GCP Cloud Functions.
+* **Change Data Capture (CDC):**  Debezium streams odds changes into Kafka topics that power both the betting engine and analytics warehouse.
 
 ---
 
 ## Infrastructure & Deployment
 
-### A. Containers
-- **Docker** for each microservice.
-- **Orchestration**: Kubernetes, AWS ECS, or Docker Swarm.
-- **CI/CD**: GitHub Actions, GitLab CI, or Jenkins pipelines.
+| Layer | Technology | Reason |
+|-------|------------|--------|
+| Orchestration | **Kubernetes** on EKS / GKE | Mature ecosystem and autoscaling |
+| CI/CD | **GitHub Actions** → Argo CD | GitOps deployment, progressive delivery |
+| Observability | **Prometheus** + Grafana, **Jaeger** tracing | Unified SLO dashboards |
+| Secrets | **HashiCorp Vault** or AWS Secrets Manager | Encryption & rotation |
 
-### B. Serverless Components
-- **AWS Lambda / GCP Cloud Functions / Azure Functions** for:
-  - Email notifications.
-  - Report generation.
-  - Scheduled data ingestion.
-  - Logging tasks or data cleanup.
-
-### C. Message Broker / Event Bus
-- **Kafka, RabbitMQ, or AWS SQS** to decouple services:
-  - Example: Betting Engine publishes “BetSettled” → Payment service processes payout → Notification service sends user updates.
-
-### D. CI/CD
-- Each microservice in a separate repository or a monorepo.
-- On push:
-  1. Run tests.
-  2. Build Docker image.
-  3. Push image to registry.
-  4. Deploy to staging/production with rolling or blue-green updates.
+> **Infrastructure‑as‑Code:**  Terraform modules in `/infra` provision all cloud resources with a single `terraform apply`.
 
 ---
 
 ## Observability & Monitoring
 
-1. **Logging**:  
-   - Aggregate logs in ELK (Elastic Stack), Splunk, or Datadog.
+Beyond basic metrics, we enforce **SLO‑driven development**:
 
-2. **Metrics**:  
-   - Use Prometheus + Grafana or a managed service (Datadog, New Relic) for CPU, memory, request latency metrics.
-
-3. **Tracing**:  
-   - Distributed tracing with Jaeger, Zipkin, or built-in APM tools in Datadog/New Relic.
+* **User‑Facing Latency (P99)** — < 200 ms for `/bets/place`.
+* **Inference Success Rate** — ≥ 99.5 % for AI predictions.
+* **End‑to‑End Trace ID** — every request carries a `trace‑id` header to correlate logs, metrics, and spans.
 
 ---
 
 ## Security & Compliance
 
-1. **Secure Communication**:  
-   - Enforce TLS/HTTPS.  
-   - Optional mTLS for internal microservice communication.
-
-2. **Access Control**:  
-   - Validate JWTs or tokens from Auth service across all microservices.
-
-3. **Regulatory Considerations**:  
-   - Gambling license requirements per region.  
-   - Data privacy (GDPR in EU, US state-specific laws).
-
-4. **Data Encryption**:  
-   - Encrypt sensitive data at rest.  
-   - Use AWS KMS or HashiCorp Vault for key management.
+* **Regulatory Footprint** — supports UKGC, MGA, and various U.S. state regulations; region‑specific rules are toggled via feature flags.
+* **Anti‑Money‑Laundering (AML)** — transaction monitoring jobs flag suspicious patterns and file SARs automatically.
+* **Responsible Gambling APIs** — self‑exclusion lists, deposit limits, and cool‑off periods enforced at the gateway.
 
 ---
 
-## Step-by-Step Development Strategy
+## Step‑by‑Step Development Strategy
 
-1. **Start with Core Services**:
-   - Authentication/User Service + Payment Service + Betting Engine + minimal Data Ingestion.  
-   - Define clear endpoints and contracts (OpenAPI or gRPC).
-
-2. **Implement Basic AI**:
-   - Create a simple ML or rules-based recommendation system.
-   - Expose `/recommend` in an AI microservice.
-
-3. **Add Chat/LLM**:
-   - Integrate an external LLM provider (OpenAI, Cohere, etc.) for quick prototyping.
-   - Provide `/chat` endpoint that incorporates domain logic.
-
-4. **Enhance Real-Time Capabilities**:
-   - Implement WebSockets or Server-Sent Events for live odds updates.
-
-5. **Refine & Scale**:
-   - Migrate batch tasks or data analytics to serverless if needed.
-   - Containerize all microservices and deploy with Kubernetes for elasticity.
-
-6. **Observability & Performance Tuning**:
-   - Add robust logging, metrics, and distributed tracing.
-   - Identify bottlenecks (AI inference latency, concurrency on betting) and optimize or add compute resources.
-
-7. **Continuous Improvement**:
-   - Advanced ML (deep learning, ensemble methods).
-   - Expand microservices for more sports or betting markets.
-   - Improve Chat/LLM experience with personalization and synergy with predictive models.
+1. **Bootstrapping (Week 0‑2)** — scaffold services with OpenAPI specs, stand‑up CI, and deploy to a shared dev cluster.
+2. **MVP (Week 3‑6)** — basic bet placement, manual odds entry, simple logistic‑regression model for win probability.
+3. **Alpha (Week 7‑12)** — integrate live data feed, add payment sandbox, enable LLM‑based support chatbot.
+4. **Beta (Week 13‑18)** — scale‑testing, security audit, and closed beta with power users.
+5. **GA (Week 19+)** — public launch, SLA monitoring, feature flags for A/B testing.
 
 ---
+
+## Responsible Gambling & Ethics
+
+We are committed to **fair play and user well‑being**:
+
+* **Age Verification** — KYC is mandatory before the first deposit.
+* **Loss Limits & Reality Checks** — configurable reminders alert users about time and money spent.
+* **Transparent Odds** — all AI‑generated odds include a confidence interval so users understand uncertainty.
+* **Bias Audits** — quarterly reviews ensure models do not systematically disadvantage specific teams or demographics.
+
+> If you or someone you know has a gambling problem, visit <https://www.begambleaware.org/>.
+
+---
+
+## Future Roadmap
+
+| Milestone | Target Release | Notes |
+|-----------|----------------|-------|
+| **Same‑Game Parlays** | Q3 2025 | Combine multiple selections within a single event |
+| **Explainable AI Module** | Q4 2025 | SHAP values exposed via `/explain` endpoint |
+| **On‑Chain Settlements** | 2026 | Explore Solana or Layer‑2 rollups for instant payouts |
+
+---
+
+
 
 ### Questions or Further Reading
-- [Microservices Best Practices](https://microservices.io/)
-- [Machine Learning in Production Guides (e.g., AWS Sagemaker)](https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html)
-- [Kubernetes Documentation](https://kubernetes.io/docs/home/)
+* [Microservices.io](https://microservices.io/) — patterns catalog.  
+* [AWS SageMaker Production‑Ready ML](https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html) — managed model deployment.  
+* [Kubernetes Documentation](https://kubernetes.io/docs/home/) — orchestration best practices.
+
+---
+
+© 2025 Neptune Sports Analytics — All rights reserved.
+
 
 ---
 
