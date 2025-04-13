@@ -154,7 +154,7 @@ We are committed to **fair play and user well‑being**:
 * [AWS SageMaker Production‑Ready ML](https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html) — managed model deployment.  
 * [Kubernetes Documentation](https://kubernetes.io/docs/home/) — orchestration best practices.
 
----
+---(test)
 
 © 2025 Neptune Sports Analytics — All rights reserved.
 
