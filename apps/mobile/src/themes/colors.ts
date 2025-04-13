@@ -26,10 +26,14 @@ export const Colors = {
   warning: '#FFCC00',
 
   // Border colors
-  border: '#E5E5E5',
+  border: '#E0E0E0',
 
   // Link colors
   link: '#1F41BB', // Updated to match primary
+
+  // New colors
+  cardBackground: '#F5F5F5',
+  oddButtonBackground: '#EBEBEB',
 };
 
 // You can also create specific theme variations if needed
