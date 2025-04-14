@@ -19,34 +19,34 @@ const BottomNavBar = ({ navigation }: any) => {
   
   // Update active tab based on current route
   useEffect(() => {
-    // Set initial active tab based on the current screen
-    const currentRouteName = navigation.getState()?.routes[navigation.getState()?.index]?.name;
-    const currentParams = navigation.getState()?.routes[navigation.getState()?.index]?.params;
-    
-    if (currentRouteName === 'Main') {
-      setActiveTab('Home');
-    } else if (currentRouteName === 'Profile') {
-      setActiveTab('Account');
-    } else if (currentRouteName === 'Temporary' && currentParams?.screen) {
-      setActiveTab(currentParams.screen);
-    }
-    
-    // Listen for navigation state changes
-    const unsubscribe = navigation.addListener('state', () => {
-      const routeName = navigation.getState()?.routes[navigation.getState()?.index]?.name;
-      const params = navigation.getState()?.routes[navigation.getState()?.index]?.params;
+    const unsubscribe = navigation.addListener('state', (e: any) => {
+      const routes = e.data.state.routes;
+      const currentRoute = routes[routes.length - 1];
+      const routeName = currentRoute.name;
+      const params = currentRoute.params;
       
-      if (routeName === 'Main') {
-        setActiveTab('Home');
-      } else if (routeName === 'Profile') {
-        setActiveTab('Account');
-      } else if (routeName === 'Temporary' && params?.screen) {
-        setActiveTab(params.screen);
-      }
+      updateActiveTab(routeName, params);
     });
-    
+
     return unsubscribe;
   }, [navigation]);
+
+  const updateActiveTab = (routeName: string, params: any) => {
+    if (routeName === 'Main') {
+      setActiveTab('Home');
+    } else if (
+      routeName === 'Profile' || 
+      routeName === 'ProfileDetails' || 
+      routeName === 'HelpSupport' || 
+      routeName === 'Accessibility' ||
+      routeName === 'PaymentMethods' ||
+      routeName === 'Statistics'
+    ) {
+      setActiveTab('Account');
+    } else if (routeName === 'Temporary' && params?.screen) {
+      setActiveTab(params.screen);
+    }
+  };
 
   const handleTabPress = (tabName: string) => {
     setActiveTab(tabName);
@@ -56,6 +56,7 @@ const BottomNavBar = ({ navigation }: any) => {
     } else if (tabName === 'Account') {
       navigation.navigate('Profile');
     } else {
+      // For other tabs, navigate to a temporary screen with the tab name as a parameter
       navigation.navigate('Temporary', { screen: tabName });
     }
   };
@@ -73,7 +74,7 @@ const BottomNavBar = ({ navigation }: any) => {
             size={24} 
             color={activeTab === tab.name ? Colors.primary : Colors.textSecondary} 
           />
-          <Text 
+          <Text
             style={[
               styles.tabText, 
               activeTab === tab.name && styles.activeTabText

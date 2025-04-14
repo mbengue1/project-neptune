@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   card: {
-    padding: 12,
+    padding: 16,
     backgroundColor: Colors.cardBackground,
     borderRadius: 12,
     marginBottom: 12,
@@ -26,38 +26,38 @@ export const styles = StyleSheet.create({
     elevation: 2,
   },
   matchInfoContainer: {
-    flexDirection: 'row',
     marginBottom: 12,
   },
-  teamsContainer: {
-    flexDirection: 'column',
+  topRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginRight: 12,
+    marginBottom: 6,
+    justifyContent: 'center',
+  },
+  teamsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
   },
   teamLogoContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: Colors.background,
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 4,
+    marginRight: 4,
   },
-  matchDetails: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  titleContainer: {
+  centerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    justifyContent: 'center',
+    gap: 8,
   },
-  title: {
-    fontSize: 16,
+  teamName: {
+    fontSize: 14,
     fontFamily: poppins.medium,
     color: Colors.textPrimary,
-    marginRight: 8,
   },
   leagueTag: {
     backgroundColor: Colors.textLight,
@@ -74,6 +74,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: poppins.regular,
     color: Colors.textSecondary,
+    textAlign: 'center',
   },
   button: {
     backgroundColor: Colors.background,

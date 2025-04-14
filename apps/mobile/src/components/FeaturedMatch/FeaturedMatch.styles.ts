@@ -17,15 +17,15 @@ export const styles = StyleSheet.create({
   matchContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   teamContainer: {
     alignItems: 'center',
     flex: 1,
   },
   teamLogoContainer: {
-    width: 48,
-    height: 48,
+    width: 40,
+    height: 40,
     borderRadius: 24,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
@@ -35,24 +35,27 @@ export const styles = StyleSheet.create({
   teamName: {
     color: Colors.buttonText,
     fontFamily: poppins.semiBold,
-    fontSize: 16,
+    fontSize: 13,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 16,
   },
   scoreContainer: {
     alignItems: 'center',
     flex: 1,
+    justifyContent: 'flex-start',
   },
   score: {
     color: Colors.buttonText,
     fontFamily: poppins.bold,
-    fontSize: 36,
+    fontSize: 38,
+    lineHeight: 56,
+    marginBottom: 4,
   },
   period: {
     color: Colors.buttonText,
     fontFamily: poppins.medium,
     fontSize: 16,
-    marginTop: 4,
+    marginBottom: 16,
   },
   oddsContainer: {
     flexDirection: 'row',
@@ -69,8 +72,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     alignItems: 'center',
-    alignSelf: 'center',
-    marginTop: 12,
   },
   oddsMultiplier: {
     color: Colors.buttonText,

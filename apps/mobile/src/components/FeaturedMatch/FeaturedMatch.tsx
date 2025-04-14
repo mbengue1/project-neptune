@@ -24,6 +24,11 @@ const FeaturedMatch = () => {
         <View style={styles.scoreContainer}>
           <Text style={styles.score}>43 : 22</Text>
           <Text style={styles.period}>0 - 2</Text>
+          <View style={styles.middleOddsContainer}>
+            <Text style={styles.oddsMultiplier}>2x</Text>
+            <Text style={styles.odds}>2.03</Text>
+            <Text style={styles.oddsValue}>+201</Text>
+          </View>
         </View>
         
         <View style={styles.teamContainer}>
@@ -39,11 +44,7 @@ const FeaturedMatch = () => {
         </View>
       </View>
       
-      <View style={styles.middleOddsContainer}>
-        <Text style={styles.oddsMultiplier}>2x</Text>
-        <Text style={styles.odds}>2.03</Text>
-        <Text style={styles.oddsValue}>+201</Text>
-      </View>
+      
     </View>
   );
 };

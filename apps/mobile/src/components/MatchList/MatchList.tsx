@@ -27,6 +27,20 @@ const matches = [
     date: 'Wednesday, 14 Feb 2021 06:30 am',
     league: 'League',
   },
+  { 
+    id: '4', 
+    team1: 'PSG', 
+    team2: 'Marseille', 
+    date: 'Thursday, 15 Feb 2021 08:30 am',
+    league: 'Ligue 1',
+  },
+  { 
+    id: '5', 
+    team1: 'Juventus', 
+    team2: 'AC Milan', 
+    date: 'Friday, 16 Feb 2021 10:30 am',
+    league: 'Serie A',
+  },
 ];
 
 const MatchList = () => {
@@ -39,23 +53,23 @@ const MatchList = () => {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.matchInfoContainer}>
-              <View style={styles.teamsContainer}>
-                <View style={styles.teamLogoContainer}>
-                  <Ionicons name="football" size={20} color={Colors.textPrimary} />
+              <View style={styles.topRow}>
+                <View style={styles.teamsContainer}>
+                  <View style={styles.teamLogoContainer}>
+                    <Ionicons name="football" size={20} color={Colors.textPrimary} />
+                  </View>
+                  <View style={styles.teamLogoContainer}>
+                    <Ionicons name="football" size={20} color={Colors.textPrimary} />
+                  </View>
                 </View>
-                <View style={styles.teamLogoContainer}>
-                  <Ionicons name="football" size={20} color={Colors.textPrimary} />
-                </View>
-              </View>
-              <View style={styles.matchDetails}>
-                <View style={styles.titleContainer}>
-                  <Text style={styles.title}>{item.team1} VS {item.team2}</Text>
+                <View style={styles.centerContent}>
+                  <Text style={styles.teamName}>{item.team1} VS {item.team2}</Text>
                   <View style={styles.leagueTag}>
                     <Text style={styles.leagueText}>{item.league}</Text>
                   </View>
                 </View>
-                <Text style={styles.date}>{item.date}</Text>
               </View>
+              <Text style={styles.date}>{item.date}</Text>
             </View>
             <TouchableOpacity style={styles.button}>
               <Text style={styles.buttonText}>Make Bet</Text>
