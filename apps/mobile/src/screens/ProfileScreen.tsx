@@ -7,7 +7,7 @@ import BottomNavBar from '../components/BottomNavBar/BottomNavBar';
 import { useAuth } from '../features/auth/AuthContext';
 
 const ProfileScreen = ({ navigation }: any) => {
-  const { logout, user } = useAuth();
+  const { logout, userData, user } = useAuth();
   const [isDarkMode, setIsDarkMode] = React.useState(false);
   const [isNotificationsEnabled, setIsNotificationsEnabled] = React.useState(true);
 
@@ -17,6 +17,9 @@ const ProfileScreen = ({ navigation }: any) => {
 
   const toggleDarkMode = () => setIsDarkMode(previousState => !previousState);
   const toggleNotifications = () => setIsNotificationsEnabled(previousState => !previousState);
+
+  // Log user ID for development purposes only
+  console.log('User ID for development:', user?.uid);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -30,6 +33,7 @@ const ProfileScreen = ({ navigation }: any) => {
           <View style={styles.profileContainer}>
             <View style={styles.avatarContainer}>
               <Ionicons name="person-circle" size={80} color={Colors.primary} />
+              <Text style={styles.username}>@{userData?.username || 'User'}</Text>
             </View>
             <View style={styles.balanceContainer}>
               <Text style={styles.balanceLabel}>Total Balance</Text>
@@ -58,10 +62,10 @@ const ProfileScreen = ({ navigation }: any) => {
           >
             <View style={styles.menuItemLeft}>
               <Ionicons name="person-outline" size={24} color={Colors.textPrimary} />
-              <Text style={styles.menuItemText}>User ID</Text>
+              <Text style={styles.menuItemText}>Username</Text>
             </View>
             <View style={styles.menuItemRight}>
-              <Text style={styles.menuItemValue}>{user?.uid || 'USR12345'}</Text>
+              <Text style={styles.menuItemValue}>{userData?.username || 'User'}</Text>
               <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
             </View>
           </TouchableOpacity>

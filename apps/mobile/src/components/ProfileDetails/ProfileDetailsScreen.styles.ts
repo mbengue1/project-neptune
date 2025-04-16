@@ -104,4 +104,15 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 8,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: Colors.textSecondary,
+    fontFamily: poppins.medium,
+  },
 });

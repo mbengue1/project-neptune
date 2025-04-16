@@ -1,96 +1,120 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Colors } from '../../themes/colors';
 import { poppins } from '../../utils/fonts';
 
-const { height, width } = Dimensions.get('window');
-
 export const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    justifyContent: 'flex-start',
-    paddingTop: height * 0.08,
-    paddingBottom: height * 0.05,
+    flexGrow: 1,
+    paddingBottom: 24,
   },
   contentContainer: {
-    width: '100%',
-    maxWidth: 400,
-    alignSelf: 'center',
-    minHeight: height * 0.85,
+    flex: 1,
     justifyContent: 'space-between',
   },
   topSection: {
-    width: '100%',
     alignItems: 'center',
+    marginBottom: 32,
+  },
+  title: {
+    fontSize: 24,
+    fontFamily: poppins.semiBold,
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  subheader: {
+    fontSize: 14,
+    fontFamily: poppins.regular,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 24,
+  },
+  stepIndicator: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  step: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.border,
+    marginHorizontal: 4,
+  },
+  activeStep: {
+    backgroundColor: Colors.primary,
+    width: 24,
   },
   middleSection: {
     width: '100%',
-    marginTop: height * 0.02,
-  },
-  bottomSection: {
-    width: '100%',
-    marginTop: height * 0.05,
-  },
-  title: {
-    fontSize: 36,
-    fontFamily: poppins.extraBold,
-    color: Colors.primary,
-    marginBottom: 16,
-    textAlign: 'center',
-    letterSpacing: 0.5,
-  },
-  subheader: {
-    fontSize: 18,
-    fontFamily: poppins.regular,
-    color: '#000000',
-    textAlign: 'center',
-    marginBottom: 40,
-    maxWidth: '80%',
+    paddingHorizontal: 24,
+    marginBottom: 32,
   },
   input: {
-    marginBottom: 24,
-    height: 60,
+    marginBottom: 16,
+  },
+  dateInput: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dateText: {
+    color: Colors.textPrimary,
+    fontFamily: poppins.regular,
+  },
+  placeholderText: {
+    color: Colors.textLight,
+    fontFamily: poppins.regular,
   },
   button: {
-    marginBottom: 24,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 8,
-    height: 56,
+    marginTop: 8,
+  },
+  navigationButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+  },
+  backButtonText: {
+    color: Colors.textPrimary,
+    fontFamily: poppins.medium,
+    marginLeft: 4,
+  },
+  nextButton: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  alreadyHaveAccount: {
+    color: Colors.primary,
+    fontFamily: poppins.medium,
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 16,
+  },
+  bottomSection: {
+    alignItems: 'center',
   },
   orText: {
-    textAlign: 'center',
-    color: Colors.primary,
+    color: Colors.textSecondary,
+    fontFamily: poppins.regular,
+    fontSize: 14,
     marginBottom: 16,
-    marginTop: 16,
-    fontFamily: poppins.medium,
-    fontSize: 16,
   },
   socialButtons: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 16,
-    marginBottom: 24,
   },
   socialButton: {
-    width: 70,
-    height: 45,
-    borderRadius: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: Colors.socialButtonBackground,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  alreadyHaveAccount: {
-    color: '#000000',
-    textAlign: 'center',
-    fontFamily: poppins.semiBold,
-    fontSize: 16,
+    marginHorizontal: 8,
   },
 });

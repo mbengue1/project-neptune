@@ -2,8 +2,8 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '../features/auth/AuthContext';
-import { SplashScreen } from '../features/splash/SplashScreen';
-import {WelcomeScreen} from '../features/welcome/WelcomeScreen';
+import { SplashScreen } from '../features/auth/SplashScreen';
+import { WelcomeScreen } from '../features/welcome/WelcomeScreen';
 import { LoginScreen } from '../features/auth/LoginScreen';
 import { SignupScreen } from '../features/auth/SignupScreen';
 import MainScreen from '../screens/MainScreen';
@@ -14,8 +14,9 @@ import AccessibilityScreen from '../screens/Accessibility/AccessibilityScreen';
 import PaymentMethodsScreen from '../screens/PaymentMethods/PaymentMethodsScreen';
 import StatisticsScreen from '../screens/Statistics/StatisticsScreen';
 import TemporaryScreen from '../screens/TemporaryScreen';
+import { RootStackParamList } from './types';
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const AppNavigator = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -32,6 +33,7 @@ export const AppNavigator = () => {
           animation: 'none',
           contentStyle: { backgroundColor: 'transparent' }
         }}
+        initialRouteName={isAuthenticated ? 'Main' : 'Welcome'}
       >
         {isAuthenticated ? (
           <>

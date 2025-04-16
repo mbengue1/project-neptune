@@ -1,5 +1,7 @@
 import { StyleSheet, Dimensions } from 'react-native';
 import { Colors } from '../../themes/colors';
+import { poppins } from '../../utils/fonts';
+// import { poppins } from '/../themes/fonts';
 
 const { height, width } = Dimensions.get('window');
 
@@ -97,5 +99,22 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Poppins-SemiBold',
     fontSize: 16,
+  },
+  forgotPasswordContainer: {
+    alignSelf: 'flex-end',
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  forgotPasswordText: {
+    color: Colors.primary,
+    fontFamily: 'Poppins-Medium',
+    fontSize: 14,
+  },
+  createAccountText: {
+    color: Colors.primary,
+    fontFamily: 'Poppins-Medium',
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 16,
   },
 });

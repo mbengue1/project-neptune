@@ -1,24 +1,37 @@
 import React from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { styles } from './ProfileDetailsScreen.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../themes/colors';
 import BottomNavBar from '../BottomNavBar/BottomNavBar';
 import { useAuth } from '../../features/auth/AuthContext';
+import { format } from 'date-fns';
 
 const ProfileDetailsScreen = ({ navigation }: any) => {
-  const { user } = useAuth();
+  const { user, userData, isLoading } = useAuth();
   
-  // Mock user data (will be replaced with real data later)
-  const userData = {
-    email: user?.email || 'user@example.com',
-    username: 'SportsFan123',
-    name: 'John Doe',
-    dateOfBirth: '01/01/1990',
-    phoneNumber: '+1 (555) 123-4567',
-    country: 'United States',
-    joinDate: 'January 2023'
+  // Format date of birth if available
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return 'Not set';
+    
+    try {
+      const date = new Date(dateString);
+      return format(date, 'MM/dd/yyyy');
+    } catch (error) {
+      return dateString;
+    }
   };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading profile...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -50,7 +63,7 @@ const ProfileDetailsScreen = ({ navigation }: any) => {
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Username</Text>
             <View style={styles.infoValueContainer}>
-              <Text style={styles.infoValue}>{userData.username}</Text>
+              <Text style={styles.infoValue}>{userData?.username || 'Not set'}</Text>
               <TouchableOpacity>
                 <Ionicons name="create-outline" size={20} color={Colors.primary} />
               </TouchableOpacity>
@@ -60,7 +73,7 @@ const ProfileDetailsScreen = ({ navigation }: any) => {
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Email</Text>
             <View style={styles.infoValueContainer}>
-              <Text style={styles.infoValue}>{userData.email}</Text>
+              <Text style={styles.infoValue}>{userData?.email || user?.email || 'Not set'}</Text>
               <TouchableOpacity>
                 <Ionicons name="create-outline" size={20} color={Colors.primary} />
               </TouchableOpacity>
@@ -70,7 +83,7 @@ const ProfileDetailsScreen = ({ navigation }: any) => {
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Full Name</Text>
             <View style={styles.infoValueContainer}>
-              <Text style={styles.infoValue}>{userData.name}</Text>
+              <Text style={styles.infoValue}>{userData?.fullName || 'Not set'}</Text>
               <TouchableOpacity>
                 <Ionicons name="create-outline" size={20} color={Colors.primary} />
               </TouchableOpacity>
@@ -80,7 +93,7 @@ const ProfileDetailsScreen = ({ navigation }: any) => {
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Date of Birth</Text>
             <View style={styles.infoValueContainer}>
-              <Text style={styles.infoValue}>{userData.dateOfBirth}</Text>
+              <Text style={styles.infoValue}>{formatDate(userData?.dateOfBirth)}</Text>
             </View>
           </View>
         </View>
@@ -91,7 +104,7 @@ const ProfileDetailsScreen = ({ navigation }: any) => {
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Phone Number</Text>
             <View style={styles.infoValueContainer}>
-              <Text style={styles.infoValue}>{userData.phoneNumber}</Text>
+              <Text style={styles.infoValue}>{userData?.phoneNumber || 'Not set'}</Text>
               <TouchableOpacity>
                 <Ionicons name="create-outline" size={20} color={Colors.primary} />
               </TouchableOpacity>
@@ -101,7 +114,7 @@ const ProfileDetailsScreen = ({ navigation }: any) => {
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Country</Text>
             <View style={styles.infoValueContainer}>
-              <Text style={styles.infoValue}>{userData.country}</Text>
+              <Text style={styles.infoValue}>{userData?.country || 'Not set'}</Text>
               <TouchableOpacity>
                 <Ionicons name="create-outline" size={20} color={Colors.primary} />
               </TouchableOpacity>
@@ -115,14 +128,7 @@ const ProfileDetailsScreen = ({ navigation }: any) => {
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Member Since</Text>
             <View style={styles.infoValueContainer}>
-              <Text style={styles.infoValue}>{userData.joinDate}</Text>
-            </View>
-          </View>
-          
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>User ID</Text>
-            <View style={styles.infoValueContainer}>
-              <Text style={styles.infoValue}>{user?.uid || 'USR12345'}</Text>
+              <Text style={styles.infoValue}>{userData?.joinDate || 'Not available'}</Text>
             </View>
           </View>
         </View>

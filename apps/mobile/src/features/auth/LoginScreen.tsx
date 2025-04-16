@@ -43,14 +43,7 @@ export const LoginScreen = ({ navigation }: Props) => {
   // handle login form submission
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Missing Information', 'Please enter both email and password.');
-      return;
-    }
-
-    // basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      Alert.alert('Missing Information', 'Please fill in all fields.');
       return;
     }
 
@@ -75,21 +68,21 @@ export const LoginScreen = ({ navigation }: Props) => {
       >
         <View style={styles.contentContainer}>
           <View style={styles.topSection}>
-            <Text style={styles.title}>Login here</Text>
-            <Text style={styles.subheader}>Welcome back you've{'\n'}been missed!</Text>
+            <Text style={styles.title}>Welcome Back</Text>
+            <Text style={styles.subheader}>Login to your account to continue your sports betting journey.</Text>
           </View>
 
           <View style={styles.middleSection}>
             <TextInput
-              style={[
-                AppStyles.input,
-                styles.input,
-                focusedInput === 'email' && AppStyles.inputFocused,
-              ]}
               placeholder="Email"
-              placeholderTextColor={Colors.placeholder}
+              placeholderTextColor={Colors.textLight}
               value={email}
               onChangeText={setEmail}
+              style={[
+                AppStyles.input, 
+                styles.input,
+                focusedInput === 'email' && AppStyles.inputFocused
+              ]}
               onFocus={() => setFocusedInput('email')}
               onBlur={() => setFocusedInput(null)}
               keyboardType="email-address"
@@ -115,8 +108,8 @@ export const LoginScreen = ({ navigation }: Props) => {
               editable={!isLoading}
             />
 
-            <Pressable>
-              <Text style={styles.forgotPassword}>Forgot your password?</Text>
+            <Pressable style={styles.forgotPasswordContainer}>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </Pressable>
 
             <Pressable 
@@ -131,12 +124,12 @@ export const LoginScreen = ({ navigation }: Props) => {
               {isLoading ? (
                 <ActivityIndicator color={Colors.buttonText} size="small" />
               ) : (
-                <Text style={AppStyles.buttonText}>Sign in</Text>
+                <Text style={AppStyles.buttonText}>Login</Text>
               )}
             </Pressable>
 
             <Pressable onPress={() => navigation.navigate('Signup')} disabled={isLoading}>
-              <Text style={styles.createAccount}>Create new account</Text>
+              <Text style={styles.createAccountText}>Don't have an account? Sign up</Text>
             </Pressable>
           </View>
 

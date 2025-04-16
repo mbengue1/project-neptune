@@ -201,4 +201,11 @@ export const styles = StyleSheet.create({
     marginLeft: 6,
     textAlign: 'center',
   },
+  username: {
+    fontFamily: poppins.medium,
+    fontSize: 16,
+    color: Colors.textSecondary,
+    marginTop: 8,
+    textAlign: 'center',
+  },
 });
