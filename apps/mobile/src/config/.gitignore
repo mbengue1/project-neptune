@@ -1,0 +1,24 @@
+# Firebase config with real credentials
+firebase.ts
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Firebase service accounts
+*-service-account.json
+firebase-admin.json
+
+# Firebase debug logs
+firebase-debug.log
+ui-debug.log
+
+# Local development files
+*.local.ts
+*.local.js
+
+# Keep template files
+!firebase.template.ts
