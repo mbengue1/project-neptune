@@ -50,6 +50,7 @@ export const styles = StyleSheet.create({
   },
   avatarContainer: {
     marginBottom: 16,
+    alignItems: 'center',
   },
   balanceContainer: {
     alignItems: 'center',

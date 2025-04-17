@@ -15,6 +15,8 @@ app.use(cors({
 // Parse JSON request body
 app.use(express.json());
 
+
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB Connected Successfully'))
@@ -25,6 +27,8 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Define routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/status', require('./routes/status'));
 
 // Basic route for testing
 app.get('/', (req, res) => {
@@ -37,6 +41,19 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something broke!');
 });
 
-// Start server
+// Add this near the top of your server.js to check ports
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT} - http://localhost:${PORT}`));
+console.log(`Server attempting to start on port ${PORT}`);
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on:`);
+  console.log(`- http://localhost:${PORT}`);
+  console.log(`- http://${require('os').hostname()}:${PORT}`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use. Please try another port.`);
+  } else {
+    console.error('Server error:', err);
+  }
+});

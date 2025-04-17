@@ -58,7 +58,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 // api base url - replace with your local ip address
-const API_URL = 'http://10.5.160.122:3000/api';
+const API_URL = 'http://localhost:3000/api';
 
 type UserData = {
   email: string;
@@ -113,34 +113,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const fetchUserData = async (currentUser: FirebaseUser) => {
       if (!isMounted) return;
-
+      setIsLoading(true);
+      
       try {
-        const userDocRef = doc(firestore, 'users', currentUser.uid);
+        // Try MongoDB first
+        console.log('Fetching user data from MongoDB...');
+        const response = await axios.get(`${API_URL}/users/${currentUser.uid}`);
         
-        // First try to get from cache
+        if (response.data) {
+          console.log('Got data from MongoDB');
+          const userData = {
+            email: response.data.email,
+            username: response.data.username,
+            fullName: response.data.fullName,
+            phoneNumber: response.data.phoneNumber,
+            country: response.data.country,
+            dateOfBirth: response.data.dateOfBirth,
+            joinDate: response.data.joinDate
+          };
+          
+          setUserData(userData);
+          setIsLoading(false);
+          return;
+        }
+      } catch (mongoErr) {
+        console.error('MongoDB fetch error:', mongoErr);
+        // Fall back to Firebase only if MongoDB fails
         try {
-          const cachedDoc = await getDoc(userDocRef);
-          if (cachedDoc.exists() && isMounted) {
-            console.log('Using cached user data');
-            setUserData(cachedDoc.data() as UserData);
-            setIsLoading(false);
+          const userDocRef = doc(firestore, 'users', currentUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists()) {
+            console.log('Got data from Firebase fallback');
+            const userData = userDoc.data() as UserData;
+            setUserData(userData);
+            
+            // Sync to MongoDB for future queries
+            try {
+              await axios.post(`${API_URL}/users`, {
+                firebaseUid: currentUser.uid,
+                ...userData
+              });
+              console.log('Synced Firebase data to MongoDB');
+            } catch (syncErr) {
+              console.error('Failed to sync to MongoDB:', syncErr);
+            }
+          } else {
+            console.log('No user data found in either database');
+            setError('User profile not found. Please complete registration.');
           }
-        } catch (cacheErr) {
-          console.log('No cached data available:', cacheErr);
-        }
-
-        // Then try to get fresh data
-        const freshDoc = await getDoc(userDocRef);
-        if (freshDoc.exists() && isMounted) {
-          console.log('Got fresh user data');
-          setUserData(freshDoc.data() as UserData);
-        } else {
-          console.log('No user data found in Firestore');
-        }
-      } catch (err) {
-        console.error('Error fetching user data:', err);
-        // Don't set error state if we have cached data
-        if (!userData) {
+        } catch (firebaseErr) {
+          console.error('Firebase fetch error:', firebaseErr);
           setError('Unable to fetch user data. Please check your connection.');
         }
       } finally {
@@ -226,70 +249,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     
     try {
-      // Validate email and username
-      const emailLower = email.toLowerCase();
-      const usernameLower = userData.username.toLowerCase();
-      
-      // Check if username already exists
-      const usersRef = collection(firestore, 'users');
-      const usernameQuery = query(usersRef, where('username', '==', usernameLower));
-      const usernameSnapshot = await getDocs(usernameQuery);
-      
-      if (!usernameSnapshot.empty) {
-        setError('Username already taken. Please choose another one.');
-        return false;
-      }
-      
       // Create the user in Firebase Auth
-      const userCredential = await createUserWithEmailAndPassword(auth, emailLower, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email.toLowerCase(), password);
       const newUser = userCredential.user;
       
       // Prepare user data with proper formatting
       const userDataToStore = {
         ...userData,
-        username: usernameLower,
-        displayUsername: userData.username,
-        email: emailLower,
+        email: email.toLowerCase(),
         uid: newUser.uid,
-        joinDate: new Date().toISOString().split('T')[0],
         createdAt: new Date().toISOString(),
         lastUpdated: new Date().toISOString()
       };
       
-      // Store user data in Firestore with retry mechanism
-      const storeUserData = async (retries = 3): Promise<boolean> => {
-        try {
-          await setDoc(doc(firestore, 'users', newUser.uid), userDataToStore);
-          return true;
-        } catch (err) {
-          if (retries > 0) {
-            console.log(`Retrying data store. Attempts remaining: ${retries}`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return storeUserData(retries - 1);
-          }
-          throw err;
-        }
-      };
-
-      // Store the data with retries
-      await storeUserData();
-      
-      // Verify the data was stored
-      const verifyDoc = await getDoc(doc(firestore, 'users', newUser.uid));
-      if (!verifyDoc.exists()) {
-        throw new Error('Failed to verify user data storage');
+      // Store in Firebase
+      try {
+        await setDoc(doc(firestore, 'users', newUser.uid), userDataToStore);
+        console.log('User data stored in Firebase');
+      } catch (firebaseErr) {
+        console.error('Failed to store in Firebase:', firebaseErr);
+        // Continue anyway to try MongoDB
       }
-
+      
+      // Store in MongoDB as backup
+      try {
+        await axios.post(`${API_URL}/users`, {
+          firebaseUid: newUser.uid,
+          email: userDataToStore.email,
+          username: userDataToStore.username,
+          fullName: userDataToStore.fullName,
+          phoneNumber: userDataToStore.phoneNumber,
+          country: userDataToStore.country,
+          dateOfBirth: userDataToStore.dateOfBirth,
+          joinDate: userDataToStore.joinDate
+        });
+        console.log('User data stored in MongoDB');
+      } catch (mongoErr) {
+        console.error('Failed to store in MongoDB:', mongoErr);
+      }
+      
       // Set local state
       setUserData(userDataToStore);
       setUser(newUser);
       setIsAuthenticated(true);
-      
-      console.log('Account created successfully:', {
-        uid: newUser.uid,
-        email: emailLower,
-        username: usernameLower
-      });
       
       return true;
     } catch (err: any) {
@@ -302,8 +304,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         errorMessage = 'Invalid email format.';
       } else if (err.code === 'auth/weak-password') {
         errorMessage = 'Password is too weak. Please use a stronger password.';
-      } else if (err.message === 'Failed to verify user data storage') {
-        errorMessage = 'Account created but failed to save profile data. Please try logging in again.';
       }
       
       setError(errorMessage);
