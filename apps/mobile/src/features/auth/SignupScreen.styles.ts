@@ -1,92 +1,90 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { Colors } from '../../themes/colors';
 import { poppins } from '../../utils/fonts';
 
+const { height, width } = Dimensions.get('window');
+
 export const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    paddingBottom: 24,
+    flex: 1,
+    paddingHorizontal: 20,
+    justifyContent: 'flex-start',
+    paddingTop: height * 0.08, // Match LoginScreen padding
+    paddingBottom: height * 0.05,
   },
   contentContainer: {
-    flex: 1,
+    width: '100%',
+    maxWidth: 400,
+    alignSelf: 'center',
+    minHeight: height * 0.85,
     justifyContent: 'space-between',
   },
   topSection: {
+    width: '100%',
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: height * 0.04, // Add space between header and steps
   },
   title: {
-    fontSize: 24,
-    fontFamily: poppins.semiBold,
-    color: Colors.textPrimary,
-    marginBottom: 8,
+    fontSize: 36,
+    fontFamily: 'Poppins-ExtraBold',
+    color: Colors.primary,
+    marginBottom: 16,
+    textAlign: 'center',
+    letterSpacing: 0.5,
   },
   subheader: {
-    fontSize: 14,
-    fontFamily: poppins.regular,
-    color: Colors.textSecondary,
+    fontSize: 18,
+    fontFamily: 'Poppins-Regular',
+    color: '#000000',
     textAlign: 'center',
-    marginBottom: 16,
-    paddingHorizontal: 24,
+    marginBottom: 24,
+    maxWidth: '80%',
   },
-  stepIndicator: {
+  stepsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 16,
+    alignItems: 'center',
+    marginBottom: height * 0.03,
   },
   step: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: width * 0.2,
+    height: 4,
     backgroundColor: Colors.border,
     marginHorizontal: 4,
+    borderRadius: 2,
   },
   activeStep: {
     backgroundColor: Colors.primary,
-    width: 24,
   },
-  middleSection: {
+  formContainer: {
     width: '100%',
-    paddingHorizontal: 24,
-    marginBottom: 32,
+    marginTop: height * 0.02,
   },
   input: {
-    marginBottom: 16,
-  },
-  dateInput: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  dateText: {
-    color: Colors.textPrimary,
-    fontFamily: poppins.regular,
-  },
-  placeholderText: {
-    color: Colors.textLight,
-    fontFamily: poppins.regular,
+    marginBottom: 20,
+    height: 60,
   },
   button: {
-    marginTop: 8,
+    marginTop: height * 0.02,
+    marginBottom: height * 0.03,
+    height: 56,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  backButtonText: {
+    color: Colors.textSecondary,
+    fontSize: 16,
+    fontFamily: 'Poppins-Medium',
+    marginLeft: 8,
   },
   navigationButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 8,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-  },
-  backButtonText: {
-    color: Colors.textPrimary,
-    fontFamily: poppins.medium,
-    marginLeft: 4,
-  },
-  nextButton: {
-    flex: 1,
-    marginLeft: 16,
   },
   alreadyHaveAccount: {
     color: Colors.primary,

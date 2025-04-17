@@ -1,8 +1,15 @@
+# Firebase config
+src/config/firebase.ts
 
+# Environment files
+.env*
+!.env.example
 
-./backend/.env
-./backend/.env.local    
-# dependencies
+# Firebase debug files
+firebase-debug.*
+ui-debug.*
+
+# Dependencies
 node_modules/
 
 # Expo
@@ -36,9 +43,8 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-
-.env 
-.env.local
+./backend/.env
+./backend/.env.local    
 
 ./backend/.env
 ./backend/.env.local

@@ -56,6 +56,23 @@ export const SignupScreen = ({ navigation }: Props) => {
     }
   };
 
+  const formatPhoneNumber = (input: string): string => {
+    // Remove all non-numeric characters
+    const cleaned = input.replace(/\D/g, '');
+    
+    // Limit to 10 digits
+    const truncated = cleaned.slice(0, 10);
+    
+    // Format the number
+    if (truncated.length <= 3) {
+      return truncated;
+    } else if (truncated.length <= 6) {
+      return `${truncated.slice(0, 3)}-${truncated.slice(3)}`;
+    } else {
+      return `${truncated.slice(0, 3)}-${truncated.slice(3, 6)}-${truncated.slice(6)}`;
+    }
+  };
+
   const validateStep1 = () => {
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -80,10 +97,10 @@ export const SignupScreen = ({ navigation }: Props) => {
   };
 
   const validateStep2 = () => {
-    // Phone number validation (basic)
-    const phoneRegex = /^\+?[0-9\s\-\(\)]{8,}$/;
+    // Phone number validation (must be in XXX-XXX-XXXX format)
+    const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;
     if (!phoneRegex.test(phoneNumber)) {
-      Alert.alert('Invalid Phone Number', 'Please enter a valid phone number.');
+      Alert.alert('Invalid Phone Number', 'Please enter a complete phone number.');
       return false;
     }
 
@@ -218,13 +235,14 @@ export const SignupScreen = ({ navigation }: Props) => {
         placeholder="Phone Number"
         placeholderTextColor={Colors.textLight}
         value={phoneNumber}
-        onChangeText={setPhoneNumber}
+        onChangeText={(text) => setPhoneNumber(formatPhoneNumber(text))}
         style={[
           AppStyles.input, 
           styles.input,
           focusedInput === 'phoneNumber' && AppStyles.inputFocused
         ]}
-        keyboardType="phone-pad"
+        keyboardType="numeric"
+        maxLength={12} // Account for the two hyphens
         onFocus={() => setFocusedInput('phoneNumber')}
         onBlur={() => setFocusedInput(null)}
         editable={!isLoading}
@@ -367,23 +385,23 @@ export const SignupScreen = ({ navigation }: Props) => {
       />
       
       <ScrollView 
-        style={AppStyles.contentContainer} 
+        style={AppStyles.contentContainer}
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.contentContainer}>
           <View style={styles.topSection}>
             <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subheader}>Create an account so you can explore the available Sportsbook.</Text>
+            <Text style={styles.subheader}>Join us to start your sports betting journey</Text>
             
-            <View style={styles.stepIndicator}>
+            <View style={styles.stepsContainer}>
               <View style={[styles.step, currentStep >= 1 && styles.activeStep]} />
               <View style={[styles.step, currentStep >= 2 && styles.activeStep]} />
               <View style={[styles.step, currentStep >= 3 && styles.activeStep]} />
             </View>
           </View>
 
-          <View style={styles.middleSection}>
+          <View style={styles.formContainer}>
             {currentStep === 1 && renderStep1()}
             {currentStep === 2 && renderStep2()}
             {currentStep === 3 && renderStep3()}
