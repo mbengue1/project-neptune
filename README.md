@@ -28,14 +28,6 @@ A modern sportsbook must **react to live events in milliseconds**, keep user fun
 * **AI‑Enhanced Decision Making** — predictive models continuously ingest real‑time sports feeds to generate dynamic odds and user‑specific recommendations.
 * **Hybrid Compute** — containerized services run on Kubernetes for always‑on workloads, while serverless functions handle bursty or scheduled jobs such as nightly reports or promotional e‑mails.
 
-<details>
-<summary>Click to view component diagram</summary>
-
-![Architecture Diagram](./docs/architecture-diagram.png)
-
-</details>
-
-> **Tip:** The diagram is generated with [Diagrams.net](https://www.diagrams.net/); edit the XML file under `docs/` and push to regenerate.
 
 ---
 
@@ -52,7 +44,6 @@ A modern sportsbook must **react to live events in milliseconds**, keep user fun
 
 ## Detailed Microservices Design
 
-*(The following expands on the original outline with typical tech‑stack choices and data contracts.)*
 
 ### A. API Gateway
 * **Recommended Tooling:**  Kong or AWS API Gateway + Lambda authorizers.
