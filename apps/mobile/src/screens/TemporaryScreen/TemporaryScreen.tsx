@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, SafeAreaView, StyleSheet } from 'react-native';
-import { Colors } from '../themes/colors';
-import { poppins } from '../utils/fonts';
+import { Colors } from '../../themes/colors';
+import { poppins } from '../../utils/fonts';
 import { Ionicons } from '@expo/vector-icons';
-import BottomNavBar from '../components/BottomNavBar/BottomNavBar';
+import BottomNavBar from '../../components/BottomNavBar/BottomNavBar';
 
 // temporary screen for sections under development
 const TemporaryScreen = ({ navigation, route }: any) => {

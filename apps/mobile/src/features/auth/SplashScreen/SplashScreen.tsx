@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { Colors } from '../../themes/colors';
+import { Colors } from '../../../themes/colors';
 
 export const SplashScreen: React.FC = () => {
   return (
@@ -17,4 +17,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.background,
   },
-}); 
+});   

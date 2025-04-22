@@ -1,6 +1,6 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
-import { AuthProvider } from './src/features/auth/AuthContext';
+import { AuthProvider } from './src/features/auth/AuthContext/AuthContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { Colors } from './src/themes/colors';
 import { useFonts } from 'expo-font';

@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, ScrollView, Switch, TextInput } from 'react-native';
 import { styles } from './ProfileScreen.styles';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../themes/colors';
-import BottomNavBar from '../components/BottomNavBar/BottomNavBar';
-import { useAuth } from '../features/auth/AuthContext';
-import { PasswordConfirmModal } from '../components/PasswordConfirmModal';
+import { Colors } from '../../themes/colors';
+import BottomNavBar from '../../components/BottomNavBar/BottomNavBar';
+import { useAuth } from '../../features/auth/AuthContext/AuthContext';
+import { PasswordConfirmModal } from '../../components/PasswordConfirm/PasswordConfirmModal';
 
 const ProfileScreen = ({ navigation }: any) => {
   const { logout, userData, user, updateUsername, updateEmail } = useAuth();

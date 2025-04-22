@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, Image, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
-import { AppStyles } from '../../themes/styles';
-import { Colors } from '../../themes/colors';
+import { AppStyles } from '../../../themes/styles';
+import { Colors } from '../../../themes/colors';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './SignupScreen.styles';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../AuthContext/AuthContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 
@@ -380,7 +380,7 @@ export const SignupScreen = ({ navigation }: Props) => {
   return (
     <View style={AppStyles.container}>
       <Image 
-        source={require('../../../assets/objects.png')} 
+        source={require('../../../../assets/objects.png')} 
         style={AppStyles.backgroundImage} 
       />
       

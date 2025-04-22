@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
-import { Colors } from '../../themes/colors';
-import { poppins } from '../../utils/fonts';
+import { Colors } from '../../../themes/colors';
+import { poppins } from '../../../utils/fonts';
 
 const { height, width } = Dimensions.get('window');
 
@@ -114,5 +114,23 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 8,
+  },
+  nextButton: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  dateInput: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingRight: 12,
+  },
+  dateText: {
+    color: Colors.textPrimary,
+    fontSize: 16,
+  },
+  placeholderText: {
+    color: Colors.textLight,
+    fontSize: 16,
   },
 });

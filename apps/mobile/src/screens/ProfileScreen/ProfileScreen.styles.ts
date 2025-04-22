@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { Colors } from '../themes/colors';
-import { poppins } from '../utils/fonts';
+import { Colors } from '../../themes/colors';
+import { poppins } from '../../utils/fonts';
 
 export const styles = StyleSheet.create({
   container: {

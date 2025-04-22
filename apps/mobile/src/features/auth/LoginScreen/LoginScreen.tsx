@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
-import { AppStyles } from '../../themes/styles';
-import { Colors } from '../../themes/colors';
+import { AppStyles } from '../../../themes/styles';
+import { Colors } from '../../../themes/colors';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './LoginScreen.styles';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../AuthContext/AuthContext';
 
 // define navigation types
 type RootStackParamList = {
@@ -57,7 +57,7 @@ export const LoginScreen = ({ navigation }: Props) => {
   return (
     <View style={AppStyles.container}>
       <Image 
-        source={require('../../../assets/objects.png')} 
+        source={require('../../../../assets/objects.png')} 
         style={AppStyles.backgroundImage} 
       />
       

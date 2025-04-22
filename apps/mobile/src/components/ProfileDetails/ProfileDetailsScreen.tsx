@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, ScrollView, ActivityIndicator, TextInput, Alert } from 'react-native';
 import { styles } from './ProfileDetailsScreen.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../themes/colors';
 import BottomNavBar from '../BottomNavBar/BottomNavBar';
-import { useAuth } from '../../features/auth/AuthContext';
+import { useAuth } from '../../features/auth/AuthContext/AuthContext';
 import { format } from 'date-fns';
-import { PasswordConfirmModal } from '../PasswordConfirmModal';
-import { ChangePasswordModal } from '../ChangePasswordModal';
+import { PasswordConfirmModal } from '../PasswordConfirm/PasswordConfirmModal';
+import { ChangePasswordModal } from '../ChangePassword/ChangePasswordModal';
 
 const ProfileDetailsScreen = ({ navigation }: any) => {
   const { user, userData, isLoading, updateUsername, updateEmail, updatePassword } = useAuth();

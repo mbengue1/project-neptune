@@ -34,6 +34,9 @@ export const Colors = {
   // New colors
   cardBackground: '#F5F5F5',
   oddButtonBackground: '#EBEBEB',
+
+  // Add this to your Colors object
+  shadow: 'rgba(0, 0, 0, 0.2)',
 };
 
 // You can also create specific theme variations if needed

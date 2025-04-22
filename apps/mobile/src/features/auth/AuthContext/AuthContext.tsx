@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { auth, firestore } from '../../config/firebase';
+import { auth, firestore } from '../../../config/firebase';
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
@@ -251,66 +251,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     checkPersistedAuth();
-
-    const fetchUserData = async (currentUser: FirebaseUser) => {
-      if (!isMounted) return;
-      setIsLoading(true);
-      
-      try {
-        // Try MongoDB first
-        console.log('Fetching user data from MongoDB...');
-        const response = await axios.get(`${API_URL}/users/${currentUser.uid}`);
-        
-        if (response.data) {
-          console.log('Got data from MongoDB');
-          const userData = {
-            email: response.data.email,
-            username: response.data.username,
-            fullName: response.data.fullName,
-            phoneNumber: response.data.phoneNumber,
-            country: response.data.country,
-            dateOfBirth: response.data.dateOfBirth,
-            joinDate: response.data.joinDate
-          };
-          
-          setUserData(userData);
-          setIsLoading(false);
-          return;
-        }
-      } catch (mongoErr) {
-        console.error('MongoDB fetch error:', mongoErr);
-        // Fall back to Firebase only if MongoDB fails
-        try {
-          const userDocRef = doc(firestore, 'users', currentUser.uid);
-          const userDoc = await getDoc(userDocRef);
-          
-          if (userDoc.exists()) {
-            console.log('Got data from Firebase fallback');
-            const userData = userDoc.data() as UserData;
-            setUserData(userData);
-            
-            // Sync to MongoDB for future queries
-            try {
-              await axios.post(`${API_URL}/users`, {
-                firebaseUid: currentUser.uid,
-                ...userData
-              });
-              console.log('Synced Firebase data to MongoDB');
-            } catch (syncErr) {
-              console.error('Failed to sync to MongoDB:', syncErr);
-            }
-          } else {
-            console.log('No user data found in either database');
-            setError('User profile not found. Please complete registration.');
-          }
-        } catch (firebaseErr) {
-          console.error('Firebase fetch error:', firebaseErr);
-          setError('Unable to fetch user data. Please check your connection.');
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!isMounted) return;
@@ -828,6 +768,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     }
   }, [user]);
+
+  // Define fetchUserData inside the component
+  const fetchUserData = async (currentUser: FirebaseUser) => {
+    setIsLoading(true);
+    
+    try {
+      // Try MongoDB first
+      console.log('Fetching user data from MongoDB...');
+      const response = await axios.get(`${API_URL}/users/${currentUser.uid}`);
+      
+      if (response.data) {
+        console.log('Got data from MongoDB');
+        const userData = {
+          email: response.data.email,
+          username: response.data.username,
+          fullName: response.data.fullName,
+          phoneNumber: response.data.phoneNumber,
+          country: response.data.country,
+          dateOfBirth: response.data.dateOfBirth,
+          joinDate: response.data.joinDate
+        };
+        
+        setUserData(userData);
+        return;
+      }
+    } catch (mongoErr) {
+      console.error('MongoDB fetch error:', mongoErr);
+      // Fall back to Firebase only if MongoDB fails
+      try {
+        const userDocRef = doc(firestore, 'users', currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          console.log('Got data from Firebase fallback');
+          const userData = userDoc.data() as UserData;
+          setUserData(userData);
+          
+          // Sync to MongoDB for future queries
+          try {
+            await axios.post(`${API_URL}/users`, {
+              firebaseUid: currentUser.uid,
+              ...userData
+            });
+            console.log('Synced Firebase data to MongoDB');
+          } catch (syncErr) {
+            console.error('Failed to sync to MongoDB:', syncErr);
+          }
+        } else {
+          console.log('No user data found in either database');
+          setError('User profile not found. Please complete registration.');
+        }
+      } catch (firebaseErr) {
+        console.error('Firebase fetch error:', firebaseErr);
+        setError('Unable to fetch user data. Please check your connection.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <AuthContext.Provider 
