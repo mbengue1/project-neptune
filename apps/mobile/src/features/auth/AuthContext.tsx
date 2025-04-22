@@ -44,6 +44,7 @@ type AuthContextType = AuthState & {
   clearError: () => void;
   updateUsername: (newUsername: string) => Promise<boolean>;
   updateEmail: (newEmail: string, password: string) => Promise<boolean>;
+  reauthenticate: (email: string, password: string) => Promise<boolean>;
 };
 
 // initial state when app loads
@@ -65,6 +66,7 @@ const AuthContext = createContext<AuthContextType>({
   clearError: () => {},
   updateUsername: async () => false,
   updateEmail: async () => false,
+  reauthenticate: async () => false,
 });
 
 // Replace localhost with your computer's IP address if using a physical device
@@ -91,6 +93,9 @@ type AuthState = {
   isLoading: boolean;
   error: string | null;
 };
+
+// Add these constants at the top of your file (outside the component)
+const AUTH_PERSISTENCE_KEY = 'auth_persistence_state';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -119,11 +124,88 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeFirestore();
   }, []);
 
+  // Save auth state to AsyncStorage whenever it changes
+  useEffect(() => {
+    const persistAuthState = async () => {
+      if (user) {
+        try {
+          // Only store minimal info needed to restore session
+          const persistData = {
+            uid: user.uid,
+            email: user.email,
+            isAuthenticated: true
+          };
+          await AsyncStorage.setItem(AUTH_PERSISTENCE_KEY, JSON.stringify(persistData));
+          console.log('Persisting auth state for user:', user.uid);
+        } catch (err) {
+          console.error('Failed to persist auth state:', err);
+        }
+      } else if (!isLoading) {
+        // Clear persistence when logged out
+        try {
+          await AsyncStorage.removeItem(AUTH_PERSISTENCE_KEY);
+          console.log('Auth state cleared');
+        } catch (err) {
+          console.error('Failed to clear auth state:', err);
+        }
+      }
+    };
+
+    persistAuthState();
+  }, [user, isLoading]);
+
   // Auth state listener
   useEffect(() => {
     let isMounted = true;
-    let retryCount = 0;
-    const maxRetries = 3;
+
+    const checkPersistedAuth = async () => {
+      try {
+        const persistedAuthString = await AsyncStorage.getItem(AUTH_PERSISTENCE_KEY);
+        
+        console.log('Checking for persisted auth state...');
+        if (persistedAuthString) {
+          console.log('Found persisted auth state:', JSON.parse(persistedAuthString));
+          
+          // Parse the persisted data
+          const persistedAuth = JSON.parse(persistedAuthString);
+          
+          // Set temporary auth state while we wait for Firebase to initialize
+          if (persistedAuth.isAuthenticated) {
+            setIsAuthenticated(true);
+            setIsLoading(true); // Keep loading until Firebase confirms
+            
+            // Try to fetch user data based on persisted UID
+            try {
+              const response = await axios.get(`${API_URL}/users/${persistedAuth.uid}`);
+              if (response.data) {
+                console.log('Restored user data from MongoDB while waiting for Firebase');
+                const userData = {
+                  email: response.data.email,
+                  username: response.data.username,
+                  fullName: response.data.fullName,
+                  phoneNumber: response.data.phoneNumber,
+                  country: response.data.country,
+                  dateOfBirth: response.data.dateOfBirth,
+                  joinDate: response.data.joinDate
+                };
+                
+                setUserData(userData);
+              }
+            } catch (err) {
+              console.error('Failed to fetch user data during session restore:', err);
+            }
+          }
+        } else if (!persistedAuthString && !auth.currentUser) {
+          // No persisted auth and no current user
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error('Error checking persisted auth:', err);
+        setIsLoading(false);
+      }
+    };
+
+    checkPersistedAuth();
 
     const fetchUserData = async (currentUser: FirebaseUser) => {
       if (!isMounted) return;
@@ -190,18 +272,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       try {
         if (currentUser) {
-          // Set basic auth state immediately
+          // User is signed in
           setUser(currentUser);
           setIsAuthenticated(true);
           
-          // Then fetch additional data with retry logic
+          // Then fetch additional data
           await fetchUserData(currentUser);
         } else {
-          // No user is signed in
-          setUser(null);
-          setUserData(null);
-          setIsAuthenticated(false);
-          setIsLoading(false);
+          // No user is signed in - check if we have persisted data
+          try {
+            const persistedAuthString = await AsyncStorage.getItem(AUTH_PERSISTENCE_KEY);
+            if (persistedAuthString) {
+              // We have persisted data but Firebase says we're logged out
+              console.log('Persisted auth found but Firebase session expired, attempting to restore...');
+              
+              const persistedAuth = JSON.parse(persistedAuthString);
+              
+              // Instead of clearing the state, keep the user logged in with the persisted data
+              // This is a temporary state until we can properly reauthenticate
+              setIsAuthenticated(true);
+              
+              // Try to fetch user data based on persisted UID
+              try {
+                const response = await axios.get(`${API_URL}/users/${persistedAuth.uid}`);
+                if (response.data) {
+                  console.log('Restored user data from MongoDB');
+                  const userData = {
+                    email: response.data.email,
+                    username: response.data.username,
+                    fullName: response.data.fullName,
+                    phoneNumber: response.data.phoneNumber,
+                    country: response.data.country,
+                    dateOfBirth: response.data.dateOfBirth,
+                    joinDate: response.data.joinDate
+                  };
+                  
+                  setUserData(userData);
+                  
+                  // We'll show a session expired message only if the user tries to perform
+                  // an action that requires authentication
+                  console.log('User session will need to be refreshed for secure operations');
+                }
+              } catch (err) {
+                console.error('Failed to fetch user data during session restore:', err);
+              } finally {
+                setIsLoading(false);
+              }
+            } else {
+              // No persisted auth - user is definitely logged out
+              setUser(null);
+              setUserData(null);
+              setIsAuthenticated(false);
+              setIsLoading(false);
+            }
+          } catch (err) {
+            console.error('Error handling persisted auth:', err);
+            setUser(null);
+            setUserData(null);
+            setIsAuthenticated(false);
+            setIsLoading(false);
+          }
         }
       } catch (err) {
         console.error('Auth state change error:', err);
@@ -514,6 +644,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => clearInterval(interval);
   }, [user, logout]);
 
+  const reauthenticate = useCallback(async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      setUser(userCredential.user);
+      setIsAuthenticated(true);
+      
+      // Refresh user data
+      await fetchUserData(userCredential.user);
+      
+      return true;
+    } catch (err) {
+      console.error('Reauthentication error:', err);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   return (
     <AuthContext.Provider 
       value={{ 
@@ -528,7 +677,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         clearError,
         updateUsername,
-        updateEmail
+        updateEmail,
+        reauthenticate
       }}
     >
       {children}
