@@ -7,7 +7,12 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  User as FirebaseUser
+  User as FirebaseUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updateEmail as firebaseUpdateEmail,
+  verifyBeforeUpdateEmail,
+  sendEmailVerification
 } from 'firebase/auth';
 import { 
   doc, 
@@ -21,9 +26,10 @@ import {
   connectFirestoreEmulator 
 } from 'firebase/firestore';
 import NetInfo from '@react-native-community/netinfo';
+import { Platform, Alert } from 'react-native';
 
-// user type definition
-type User = {
+// Rename local user type definition to avoid conflict
+type AppUser = { // Renamed from User
   id: string;
   email: string;
   name?: string;
@@ -36,6 +42,8 @@ type AuthContextType = AuthState & {
   signup: (email: string, password: string, userData: UserData) => Promise<boolean>;
   logout: () => Promise<void>;
   clearError: () => void;
+  updateUsername: (newUsername: string) => Promise<boolean>;
+  updateEmail: (newEmail: string, password: string) => Promise<boolean>;
 };
 
 // initial state when app loads
@@ -55,10 +63,16 @@ const AuthContext = createContext<AuthContextType>({
   signup: async () => false,
   logout: async () => {},
   clearError: () => {},
+  updateUsername: async () => false,
+  updateEmail: async () => false,
 });
 
-// api base url - replace with your local ip address
-const API_URL = 'http://localhost:3000/api';
+// Replace localhost with your computer's IP address if using a physical device
+const API_URL = Platform.select({
+  ios: 'http://localhost:3000/api',
+  android: 'http://10.0.2.2:3000/api', // Android emulator localhost
+  default: 'http://localhost:3000/api',
+});
 
 type UserData = {
   email: string;
@@ -253,6 +267,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userCredential = await createUserWithEmailAndPassword(auth, email.toLowerCase(), password);
       const newUser = userCredential.user;
       
+      // Send email verification
+      await sendEmailVerification(newUser);
+      
       // Prepare user data with proper formatting
       const userDataToStore = {
         ...userData,
@@ -293,6 +310,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(newUser);
       setIsAuthenticated(true);
       
+      // Show verification alert
+      // Alert.alert(
+      //   "Email Verification Required",
+      //   "A verification email has been sent to your email address. Please check your inbox and verify your email to access all features.",
+      //   [{ text: "OK" }]
+      // );
+      
       return true;
     } catch (err: any) {
       console.error('Signup error:', err);
@@ -332,6 +356,164 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  // Add these methods to your AuthContext
+  const updateUsername = useCallback(async (newUsername: string): Promise<boolean> => {
+    try {
+      if (!user) throw new Error('No user logged in');
+      
+      const endpoint = `${API_URL}/users/${user.uid}`;
+      console.log('Making request to:', endpoint);
+      
+      // First verify the user exists
+      try {
+        const checkUser = await axios.get(`${API_URL}/users/${user.uid}`);
+        console.log('User exists:', checkUser.data);
+      } catch (err) {
+        console.error('User check failed:', err);
+        throw new Error('User not found in database');
+      }
+
+      // Then update the username
+      const response = await axios.put(`${API_URL}/users/${user.uid}`, {
+        username: newUsername
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Response:', response.status, response.data);
+      
+      if (response.status === 200) {
+        setUserData(prev => prev ? { ...prev, username: newUsername } : null);
+        return true;
+      }
+      throw new Error('Failed to update username');
+    } catch (err) {
+      console.error('Error updating username:', err);
+      if (axios.isAxiosError(err)) {
+        console.error('Full error:', {
+          status: err.response?.status,
+          data: err.response?.data,
+          url: err.config?.url
+        });
+      }
+      throw err;
+    }
+  }, [user]);
+
+  const updateEmail = useCallback(async (newEmail: string, password: string): Promise<boolean> => {
+    try {
+      if (!user) throw new Error('No user logged in');
+      
+      // First reauthenticate with Firebase
+      try {
+        const credential = EmailAuthProvider.credential(user.email!, password);
+        await reauthenticateWithCredential(user, credential);
+      } catch (authErr: any) {
+        if (authErr.code === 'auth/invalid-credential') {
+          throw new Error('Incorrect password. Please verify and try again.');
+        }
+        throw authErr;
+      }
+      
+      // Validate email format
+      if (!/^\S+@\S+\.\S+$/.test(newEmail)) {
+        throw new Error('Please enter a valid email address');
+      }
+      
+      // Send verification email to the new address
+      await verifyBeforeUpdateEmail(user, newEmail);
+      
+      // Show alert immediately after sending verification email
+      Alert.alert(
+        "Email Change Requested",
+        "A verification email has been sent to your new email address. After verification, you'll need to log in again with your new email.",
+        [{ text: "OK" }]
+      );
+      
+      return true;
+    } catch (err: any) {
+      console.error('Error updating email:', err);
+      if (err.code === 'auth/requires-recent-login') {
+        throw new Error('Please log out and log in again before changing your email');
+      } else if (err.code === 'auth/email-already-in-use') {
+        throw new Error('This email is already in use');
+      } else if (err.code === 'auth/invalid-email') {
+        throw new Error('Invalid email format');
+      } else if (err.code === 'auth/operation-not-allowed') {
+        throw new Error('A verification email has been sent to your new email address. Please verify before continuing.');
+      }
+      throw err;
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    // Check for email verification status on reload
+    const checkEmailVerification = () => {
+      if (user.emailVerified) {
+        // If email is verified, update MongoDB with the new email
+        const updateMongoDBEmail = async () => {
+          try {
+            // Check if the email in MongoDB is different from Firebase
+            const userResponse = await axios.get(`${API_URL}/users/${user.uid}`);
+            const mongoEmail = userResponse.data.email;
+            
+            if (mongoEmail !== user.email) {
+              // Email has changed and been verified - update MongoDB
+              await axios.put(`${API_URL}/users/${user.uid}`, {
+                email: user.email
+              });
+              
+              // Update local state
+              setUserData(prev => prev ? { ...prev, email: user.email! } : null);
+              
+              console.log('Email updated in MongoDB after verification');
+              
+              // Show alert about the email change
+              // Alert.alert(
+              //   "Email Updated",
+              //   "Your email has been successfully verified and updated. You'll need to log in again with your new email.",
+              //   [
+              //     { 
+              //       text: "Log out now", 
+              //       onPress: () => {
+              //         logout();
+              //       }
+              //     },
+              //     {
+              //       text: "Later",
+              //       style: "cancel"
+              //     }
+              //   ]
+              // );
+            }
+          } catch (err) {
+            console.error('Failed to update email in MongoDB after verification:', err);
+          }
+        };
+        
+        updateMongoDBEmail();
+      }
+    };
+    
+    // Check on mount and when user changes
+    checkEmailVerification();
+    
+    // Also reload user occasionally to check verification status
+    const interval = setInterval(() => {
+      user.reload().then(() => {
+        checkEmailVerification();
+      }).catch(err => {
+        console.error('Error reloading user:', err);
+      });
+    }, 60000); // Check every minute
+    
+    return () => clearInterval(interval);
+  }, [user, logout]);
+
   return (
     <AuthContext.Provider 
       value={{ 
@@ -344,7 +526,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login, 
         signup, 
         logout,
-        clearError
+        clearError,
+        updateUsername,
+        updateEmail
       }}
     >
       {children}

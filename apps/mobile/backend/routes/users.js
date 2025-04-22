@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
 
 // @route   POST /api/users
 // @desc    Create or update user
@@ -99,6 +100,66 @@ router.get('/:firebaseUid', async (req, res) => {
   }
 });
 
+// @route   PUT /api/users/:firebaseUid
+// @desc    Update user profile
+// @access  Public (for now)
+router.put('/:firebaseUid', async (req, res) => {
+  const { firebaseUid } = req.params;
+  const { username, email } = req.body;
+  
+  console.log('Update request:', { firebaseUid, username, email });
+  
+  // Check if at least one field is provided
+  if (!username && !email) {
+    return res.status(400).json({ 
+      message: 'At least one field (username or email) is required',
+      received: req.body 
+    });
+  }
+  
+  try {
+    // First verify user exists
+    const existingUser = await User.findOne({ firebaseUid });
+    if (!existingUser) {
+      console.log('User not found:', firebaseUid);
+      return res.status(404).json({ 
+        message: 'User not found',
+        firebaseUid 
+      });
+    }
+    
+    // Prepare update object with only provided fields
+    const updateFields = {};
+    if (username) updateFields.username = username;
+    if (email) updateFields.email = email;
+    
+    // Add last updated timestamp
+    updateFields.lastUpdated = new Date();
+    
+    // Update the user
+    const updatedUser = await User.findOneAndUpdate(
+      { firebaseUid },
+      { $set: updateFields },
+      { new: true }
+    );
+    
+    console.log('User updated successfully:', {
+      firebaseUid,
+      fields: Object.keys(updateFields),
+      success: !!updatedUser
+    });
+    
+    res.json(updatedUser);
+  } catch (err) {
+    console.error('Update error:', err);
+    res.status(500).json({ 
+      message: 'Server error',
+      error: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+  }
+});
+
 // Add this route for testing
 router.post('/test-create', async (req, res) => {
   try {
@@ -122,6 +183,21 @@ router.post('/test-create', async (req, res) => {
     });
   } catch (err) {
     console.error('Test user creation error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add this test route
+router.get('/test', async (req, res) => {
+  try {
+    const users = await User.find().limit(1);
+    res.json({
+      message: 'API is working',
+      dbConnected: mongoose.connection.readyState === 1,
+      userCount: await User.countDocuments(),
+      sampleUser: users[0]
+    });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

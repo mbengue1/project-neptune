@@ -37,7 +37,7 @@ export const styles = StyleSheet.create({
   avatarContainer: {
     marginBottom: 16,
   },
-  editButton: {
+  editButtonCam: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.primary,
@@ -45,7 +45,9 @@ export const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
   },
-  editButtonText: {
+  editCamButtonText: {
+    alignSelf: 'center',
+
     color: Colors.buttonText,
     fontFamily: poppins.medium,
     fontSize: 14,
@@ -104,15 +106,35 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 8,
   },
-  loadingContainer: {
+  editInput: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: 40,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginRight: 8,
+    color: Colors.textPrimary,
+    fontFamily: poppins.regular,
   },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: Colors.textSecondary,
+  editButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: Colors.primary,
+    marginLeft: 8,
+  },
+  editButtonText: {
+    color: Colors.buttonText,
     fontFamily: poppins.medium,
+    fontSize: 14,
+  },
+  errorText: {
+    color: Colors.error,
+    fontFamily: poppins.regular,
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+    paddingHorizontal: 16,
   },
 });

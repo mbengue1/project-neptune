@@ -1,15 +1,20 @@
-import React from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, SafeAreaView, TouchableOpacity, ScrollView, Switch, TextInput } from 'react-native';
 import { styles } from './ProfileScreen.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../themes/colors';
 import BottomNavBar from '../components/BottomNavBar/BottomNavBar';
 import { useAuth } from '../features/auth/AuthContext';
+import { PasswordConfirmModal } from '../components/PasswordConfirmModal';
 
 const ProfileScreen = ({ navigation }: any) => {
-  const { logout, userData, user } = useAuth();
+  const { logout, userData, user, updateUsername, updateEmail } = useAuth();
   const [isDarkMode, setIsDarkMode] = React.useState(false);
   const [isNotificationsEnabled, setIsNotificationsEnabled] = React.useState(true);
+  const [isEditing, setIsEditing] = useState<'username' | 'email' | null>(null);
+  const [newValue, setNewValue] = useState('');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogout = async () => {
     await logout();
@@ -17,6 +22,55 @@ const ProfileScreen = ({ navigation }: any) => {
 
   const toggleDarkMode = () => setIsDarkMode(previousState => !previousState);
   const toggleNotifications = () => setIsNotificationsEnabled(previousState => !previousState);
+
+  const handleUpdateUsername = async () => {
+    try {
+      await updateUsername(newValue);
+      setIsEditing(null);
+      setNewValue('');
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleUpdateEmail = async (password: string) => {
+    try {
+      await updateEmail(newValue, password);
+      setIsEditing(null);
+      setNewValue('');
+      setShowPasswordModal(false);
+    } catch (err: any) {
+      throw err; // This will be handled by the modal
+    }
+  };
+
+  const handleEditPress = (field: 'username' | 'email') => {
+    setIsEditing(field);
+    setNewValue(field === 'username' ? userData?.username || '' : userData?.email || '');
+  };
+
+  const handleSave = async () => {
+    if (!newValue.trim()) {
+      setError('Field cannot be empty');
+      return;
+    }
+
+    try {
+      if (isEditing === 'username') {
+        await handleUpdateUsername();
+      } else if (isEditing === 'email') {
+        setShowPasswordModal(true);
+      }
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(null);
+    setNewValue('');
+    setError(null);
+  };
 
   // Log user ID for development purposes only
   console.log('User ID for development:', user?.uid);
@@ -186,6 +240,18 @@ const ProfileScreen = ({ navigation }: any) => {
       </ScrollView>
       
       <BottomNavBar navigation={navigation} />
+      
+      <PasswordConfirmModal
+        isVisible={showPasswordModal}
+        onClose={() => {
+          setShowPasswordModal(false);
+          setIsEditing(null);
+          setNewValue('');
+        }}
+        onConfirm={handleUpdateEmail}
+        title="Confirm Password"
+        message="Please enter your password to update your email address"
+      />
     </SafeAreaView>
   );
 };

@@ -101,6 +101,8 @@ export const styles = StyleSheet.create({
   menuItemRight: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    justifyContent: 'flex-end',
   },
   menuItemText: {
     fontSize: 16,
@@ -109,9 +111,9 @@ export const styles = StyleSheet.create({
     marginLeft: 12,
   },
   menuItemValue: {
-    fontSize: 14,
-    fontFamily: poppins.regular,
     color: Colors.textSecondary,
+    fontFamily: poppins.regular,
+    fontSize: 16,
     marginRight: 8,
   },
   paymentMethodsPreview: {
@@ -206,6 +208,36 @@ export const styles = StyleSheet.create({
     fontFamily: poppins.medium,
     fontSize: 16,
     color: Colors.textSecondary,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  editInput: {
+    flex: 1,
+    height: 40,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginRight: 8,
+    color: Colors.textPrimary,
+    fontFamily: poppins.regular,
+  },
+  editButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: Colors.primary,
+    marginLeft: 8,
+  },
+  editButtonText: {
+    color: Colors.buttonText,
+    fontFamily: poppins.medium,
+    fontSize: 14,
+  },
+  errorText: {
+    color: Colors.error,
+    fontFamily: poppins.regular,
+    fontSize: 14,
     marginTop: 8,
     textAlign: 'center',
   },

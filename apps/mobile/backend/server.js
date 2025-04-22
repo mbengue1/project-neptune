@@ -15,7 +15,13 @@ app.use(cors({
 // Parse JSON request body
 app.use(express.json());
 
-
+// Add this before your routes
+app.use((req, res, next) => {
+  console.log(`Incoming request: ${req.method} ${req.url}`);
+  console.log('Headers:', req.headers);
+  console.log('Body:', req.body);
+  next();
+});
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -25,6 +31,17 @@ mongoose.connect(process.env.MONGODB_URI)
     process.exit(1); // Exit with failure
   });
 
+// Add this to check MongoDB connection
+mongoose.connection.on('connected', () => {
+  console.log('MongoDB connected to:', 
+    mongoose.connection.db.databaseName
+  );
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
+
 // Define routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
@@ -33,6 +50,26 @@ app.use('/api/status', require('./routes/status'));
 // Basic route for testing
 app.get('/', (req, res) => {
   res.send('Neptune Sportsbook API is running');
+});
+
+// Add this after your routes are registered
+app.get('/api/routes', (req, res) => {
+  const routes = [];
+  app._router.stack.forEach(middleware => {
+    if (middleware.route) {
+      routes.push({
+        path: middleware.route.path,
+        method: Object.keys(middleware.route.methods)[0],
+        fullPath: `/api/users${middleware.route.path}`
+      });
+    }
+  });
+  res.json({
+    routes,
+    registeredPaths: app._router.stack
+      .filter(r => r.route)
+      .map(r => `${Object.keys(r.route.methods)[0].toUpperCase()} ${r.route.path}`)
+  });
 });
 
 // Error handling middleware
