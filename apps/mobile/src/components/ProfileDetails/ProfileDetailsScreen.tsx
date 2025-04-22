@@ -7,14 +7,16 @@ import BottomNavBar from '../BottomNavBar/BottomNavBar';
 import { useAuth } from '../../features/auth/AuthContext';
 import { format } from 'date-fns';
 import { PasswordConfirmModal } from '../PasswordConfirmModal';
+import { ChangePasswordModal } from '../ChangePasswordModal';
 
 const ProfileDetailsScreen = ({ navigation }: any) => {
-  const { user, userData, isLoading, updateUsername, updateEmail } = useAuth();
+  const { user, userData, isLoading, updateUsername, updateEmail, updatePassword } = useAuth();
   const [isEditing, setIsEditing] = useState<'username' | 'email' | null>(null);
   const [newValue, setNewValue] = useState('');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pendingEmailVerification, setPendingEmailVerification] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
   const handleEditPress = (field: 'username' | 'email') => {
     setIsEditing(field);
@@ -75,6 +77,18 @@ const ProfileDetailsScreen = ({ navigation }: any) => {
     setIsEditing(null);
     setNewValue('');
     setError(null);
+  };
+
+  const handleChangePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      if (!user) {
+        throw new Error('Please log out and log in again before changing your password');
+      }
+      
+      await updatePassword(currentPassword, newPassword);
+    } catch (err: any) {
+      throw err; // This will be handled by the modal
+    }
   };
 
   // Format date of birth if available
@@ -238,7 +252,10 @@ const ProfileDetailsScreen = ({ navigation }: any) => {
           </View>
         </View>
         
-        <TouchableOpacity style={styles.passwordButton}>
+        <TouchableOpacity 
+          style={styles.passwordButton}
+          onPress={() => setShowChangePasswordModal(true)}
+        >
           <Ionicons name="lock-closed-outline" size={20} color={Colors.buttonText} />
           <Text style={styles.passwordButtonText}>Change Password</Text>
         </TouchableOpacity>
@@ -256,6 +273,12 @@ const ProfileDetailsScreen = ({ navigation }: any) => {
         onConfirm={handleUpdateEmail}
         title="Confirm Password"
         message="Please enter your password to update your email address"
+      />
+      
+      <ChangePasswordModal
+        isVisible={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+        onSubmit={handleChangePassword}
       />
       
       <BottomNavBar navigation={navigation} />

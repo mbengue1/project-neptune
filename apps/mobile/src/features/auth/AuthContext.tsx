@@ -12,7 +12,8 @@ import {
   reauthenticateWithCredential,
   updateEmail as firebaseUpdateEmail,
   verifyBeforeUpdateEmail,
-  sendEmailVerification
+  sendEmailVerification,
+  updatePassword as firebaseUpdatePassword
 } from 'firebase/auth';
 import { 
   doc, 
@@ -45,6 +46,8 @@ type AuthContextType = AuthState & {
   updateUsername: (newUsername: string) => Promise<boolean>;
   updateEmail: (newEmail: string, password: string) => Promise<boolean>;
   reauthenticate: (email: string, password: string) => Promise<boolean>;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+  checkEmailVerificationStatus: () => Promise<boolean>;
 };
 
 // initial state when app loads
@@ -67,6 +70,8 @@ const AuthContext = createContext<AuthContextType>({
   updateUsername: async () => false,
   updateEmail: async () => false,
   reauthenticate: async () => false,
+  updatePassword: async () => false,
+  checkEmailVerificationStatus: async () => false,
 });
 
 // Replace localhost with your computer's IP address if using a physical device
@@ -172,9 +177,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Set temporary auth state while we wait for Firebase to initialize
           if (persistedAuth.isAuthenticated) {
             setIsAuthenticated(true);
-            setIsLoading(true); // Keep loading until Firebase confirms
             
-            // Try to fetch user data based on persisted UID
+            // Try to get the current user from Firebase
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+              console.log('Firebase user already available:', currentUser.uid);
+              setUser(currentUser);
+            } else {
+              console.log('No Firebase user, attempting to sign in silently with persisted data');
+              // Try to sign in silently using the persisted email
+              try {
+                // Update the temporary user object creation with a better reload implementation
+                const tempUser = {
+                  uid: persistedAuth.uid,
+                  email: persistedAuth.email,
+                  emailVerified: false,
+                  // Add other required properties with placeholder values
+                  displayName: null,
+                  phoneNumber: null,
+                  photoURL: null,
+                  providerId: 'firebase',
+                  metadata: {},
+                  providerData: [],
+                  refreshToken: '',
+                  tenantId: null,
+                  delete: async () => { throw new Error('Not implemented'); },
+                  getIdToken: async () => { throw new Error('Not implemented'); },
+                  getIdTokenResult: async () => { throw new Error('Not implemented'); },
+                  // Implement a safer reload method that doesn't throw
+                  reload: async () => { 
+                    console.log('Reload called on temporary user object');
+                    return Promise.resolve(); 
+                  },
+                  toJSON: () => ({}),
+                  isAnonymous: false
+                } as FirebaseUser;
+                
+                setUser(tempUser);
+              } catch (signInErr) {
+                console.error('Failed to restore user session:', signInErr);
+              }
+            }
+            
+            // Then fetch additional data
             try {
               const response = await axios.get(`${API_URL}/users/${persistedAuth.uid}`);
               if (response.data) {
@@ -471,18 +516,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     try {
-      await Promise.race([
-        firebaseSignOut(auth),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Logout timeout')), 5000)
-        )
-      ]);
+      // Only try to sign out if there's an active Firebase session
+      if (auth.currentUser) {
+        await Promise.race([
+          firebaseSignOut(auth),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Logout timeout')), 5000)
+          )
+        ]);
+      } else {
+        console.log('No active Firebase session, clearing local state only');
+      }
+      
+      // Clear local state regardless of Firebase session
+      setUser(null);
+      setUserData(null);
+      setIsAuthenticated(false);
+      
+      // Clear persisted auth state
+      try {
+        await AsyncStorage.removeItem(AUTH_PERSISTENCE_KEY);
+        console.log('Auth state cleared during logout');
+      } catch (err) {
+        console.error('Failed to clear persisted auth state:', err);
+      }
     } catch (err) {
       console.error('Error signing out:', err);
     } finally {
       setIsLoading(false);
-      setUser(null);
-      setUserData(null);
     }
   }, []);
 
@@ -663,6 +724,111 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const updatePassword = useCallback(async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    try {
+      console.log('Update password called, user state:', user ? 'User exists' : 'No user');
+      
+      if (!user) {
+        throw new Error('No user logged in');
+      }
+      
+      // Check if this is a temporary user object (from persisted state)
+      if (!auth.currentUser) {
+        console.log('No active Firebase session, attempting to reauthenticate');
+        
+        // We need to reauthenticate first - try to sign in with the provided password
+        try {
+          if (!user.email) throw new Error('User email not available');
+          
+          const userCredential = await signInWithEmailAndPassword(auth, user.email, currentPassword);
+          // Update the user object with the authenticated one
+          setUser(userCredential.user);
+          
+          // Now we can update the password
+          await firebaseUpdatePassword(userCredential.user, newPassword);
+          
+          Alert.alert(
+            "Password Updated",
+            "Your password has been successfully updated.",
+            [{ text: "OK" }]
+          );
+          
+          return true;
+        } catch (authErr: any) {
+          console.error('Reauthentication failed:', authErr);
+          if (authErr.code === 'auth/invalid-credential') {
+            throw new Error('Incorrect password. Please verify and try again.');
+          }
+          throw new Error('Please log out and log in again before changing your password');
+        }
+      }
+      
+      // Normal flow for an active Firebase session
+      try {
+        const credential = EmailAuthProvider.credential(user.email!, currentPassword);
+        await reauthenticateWithCredential(user, credential);
+      } catch (authErr: any) {
+        if (authErr.code === 'auth/invalid-credential') {
+          throw new Error('Incorrect password. Please verify and try again.');
+        }
+        throw authErr;
+      }
+      
+      // Validate password strength
+      if (newPassword.length < 8) {
+        throw new Error('Password must be at least 8 characters long');
+      }
+      
+      // Update password in Firebase
+      await firebaseUpdatePassword(user, newPassword);
+      
+      // Show success message
+      Alert.alert(
+        "Password Updated",
+        "Your password has been successfully updated.",
+        [{ text: "OK" }]
+      );
+      
+      return true;
+    } catch (err: any) {
+      console.error('Error updating password:', err);
+      throw err;
+    }
+  }, [user]);
+
+  const checkEmailVerificationStatus = useCallback(async (): Promise<boolean> => {
+    try {
+      if (!user) return false;
+      
+      // Check if we have an active Firebase session
+      if (!auth.currentUser) {
+        console.log('No active Firebase session, cannot check email verification');
+        return false;
+      }
+      
+      // Only try to reload if we have an active Firebase session
+      try {
+        // Force reload the user to get the latest verification status
+        await user.reload();
+        
+        // Get the fresh user object
+        const freshUser = auth.currentUser;
+        if (freshUser && freshUser.emailVerified) {
+          // Update our local user state
+          setUser(freshUser);
+          return true;
+        }
+      } catch (reloadErr) {
+        console.error('Error reloading user:', reloadErr);
+      }
+      
+      return false;
+    } catch (err) {
+      console.error('Error checking email verification status:', err);
+      return false;
+    }
+  }, [user]);
+
   return (
     <AuthContext.Provider 
       value={{ 
@@ -678,7 +844,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearError,
         updateUsername,
         updateEmail,
-        reauthenticate
+        reauthenticate,
+        updatePassword,
+        checkEmailVerificationStatus,
       }}
     >
       {children}

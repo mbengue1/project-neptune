@@ -116,10 +116,11 @@ const ProfileScreen = ({ navigation }: any) => {
           >
             <View style={styles.menuItemLeft}>
               <Ionicons name="person-outline" size={24} color={Colors.textPrimary} />
-              <Text style={styles.menuItemText}>Username</Text>
+              <Text style={styles.menuItemText}>
+              {userData?.username || 'User'}
+              </Text>
             </View>
             <View style={styles.menuItemRight}>
-              <Text style={styles.menuItemValue}>{userData?.username || 'User'}</Text>
               <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
             </View>
           </TouchableOpacity>

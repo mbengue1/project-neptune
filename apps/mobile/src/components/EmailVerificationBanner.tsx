@@ -1,14 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../themes/colors';
 import { useAuth } from '../features/auth/AuthContext';
 import { sendEmailVerification } from 'firebase/auth';
+import { auth } from '../config/firebase';
 
 const EmailVerificationBanner = () => {
-  const { user } = useAuth();
+  const { user, checkEmailVerificationStatus } = useAuth();
   const [dismissed, setDismissed] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  
+  useEffect(() => {
+    const checkStatus = async () => {
+      if (user && auth.currentUser) {
+        try {
+          const verified = await checkEmailVerificationStatus();
+          setIsVerified(verified);
+        } catch (err) {
+          console.error('Error in banner when checking verification:', err);
+        }
+      }
+    };
+    
+    checkStatus();
+    
+    if (auth.currentUser) {
+      const interval = setInterval(checkStatus, 30000);
+      return () => clearInterval(interval);
+    }
+    
+    return undefined;
+  }, [user, checkEmailVerificationStatus]);
   
   const handleResendVerification = async () => {
     if (!user) return;
@@ -33,7 +57,7 @@ const EmailVerificationBanner = () => {
     setDismissed(true);
   };
   
-  if (!user || user.emailVerified || dismissed) return null;
+  if (!user || !auth.currentUser || isVerified || dismissed) return null;
   
   return (
     <View style={styles.container}>
