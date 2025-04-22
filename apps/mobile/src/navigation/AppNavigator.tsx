@@ -14,6 +14,8 @@ import AccessibilityScreen from '../screens/Accessibility/AccessibilityScreen';
 import PaymentMethodsScreen from '../screens/PaymentMethods/PaymentMethodsScreen';
 import StatisticsScreen from '../screens/Statistics/StatisticsScreen';
 import TemporaryScreen from '../screens/TemporaryScreen/TemporaryScreen';
+import BetsScreen from '../screens/BetsScreen/BetsScreen';
+import MatchDetailsScreen from '../screens/MatchDetailsScreen/MatchDetailsScreen';
 import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -45,6 +47,8 @@ export const AppNavigator = () => {
             <Stack.Screen name="PaymentMethods" component={PaymentMethodsScreen} />
             <Stack.Screen name="Statistics" component={StatisticsScreen} />
             <Stack.Screen name="Temporary" component={TemporaryScreen} />
+            <Stack.Screen name="Bets" component={BetsScreen} />
+            <Stack.Screen name="MatchDetails" component={MatchDetailsScreen} />
           </>
         ) : (
           <>

@@ -34,6 +34,8 @@ const BottomNavBar = ({ navigation }: any) => {
   const updateActiveTab = (routeName: string, params: any) => {
     if (routeName === 'Main') {
       setActiveTab('Home');
+    } else if (routeName === 'Bets') {
+      setActiveTab('Bets');
     } else if (
       routeName === 'Profile' || 
       routeName === 'ProfileDetails' || 
@@ -55,6 +57,8 @@ const BottomNavBar = ({ navigation }: any) => {
       navigation.navigate('Main');
     } else if (tabName === 'Account') {
       navigation.navigate('Profile');
+    } else if (tabName === 'Bets') {
+      navigation.navigate('Bets', { sportType: 'All' });
     } else {
       // For other tabs, navigate to a temporary screen with the tab name as a parameter
       navigation.navigate('Temporary', { screen: tabName });

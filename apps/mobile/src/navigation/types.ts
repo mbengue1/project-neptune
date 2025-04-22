@@ -11,4 +11,6 @@ export type RootStackParamList = {
   PaymentMethods: undefined;
   Statistics: undefined;
   Temporary: undefined;
+  Bets: { sportType?: string };
+  MatchDetails: { match: any };
 }; 
