@@ -141,18 +141,20 @@ export const styles = StyleSheet.create({
   },
   oddsButton: {
     paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingVertical: 8,
     borderRadius: 4,
     borderWidth: 1,
     borderColor: Colors.border,
     backgroundColor: Colors.background,
     minWidth: 80,
     alignItems: 'center',
+    height: 44,
   },
   oddsValue: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: poppins.medium,
-    color: Colors.primary,
+    color: '#174be8',
+    textAlign: 'center',
   },
   headerRight: {
     flexDirection: 'row',

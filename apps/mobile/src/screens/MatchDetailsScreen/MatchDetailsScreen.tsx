@@ -4,7 +4,16 @@ import { styles } from './MatchDetailsScreen.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../themes/colors';
 import BottomNavBar from '../../components/BottomNavBar/BottomNavBar';
-import { mockBetsByCategory, BetOption, Bet, BetCategories } from '../../data/mockBets';
+import { 
+  mockBetsByCategory, 
+  basketballMockBets, 
+  footballMockBets,
+  hockeyMockBets,
+  tennisMockBets,
+  BetOption, 
+  Bet, 
+  BetCategories 
+} from '../../data/mockBets';
 import { 
   SoccerMatch, 
   BasketballMatch, 
@@ -45,44 +54,68 @@ const betCategoriesBySport: Record<SportType, Array<{ id: string; name: string }
     { id: 'popular', name: 'Popular' },
     { id: 'same_game', name: 'Same Game Parlay™' },
     { id: 'game_lines', name: 'Game Lines' },
-    { id: 'alt_lines', name: 'Alt Lines' },
+    { id: 'quick_bets', name: 'Quick Bets' },
     { id: 'player_points', name: 'Player Points' },
+    { id: 'player_combos', name: 'Player Combos' },
+    { id: 'player_threes', name: 'Player 3-Pointers' },
     { id: 'player_rebounds', name: 'Player Rebounds' },
     { id: 'player_assists', name: 'Player Assists' },
-    { id: 'player_threes', name: 'Player Threes' },
+    { id: 'alt_lines', name: 'Alt Lines' },
     { id: 'quarters', name: 'Quarters' },
+    { id: 'halves', name: 'Halves' },
+    { id: 'first_basket', name: 'First Basket' },
+    { id: 'team_totals', name: 'Team Totals' },
     { id: 'race_to', name: 'Race To' },
   ],
   Football: [
     { id: 'popular', name: 'Popular' },
     { id: 'same_game', name: 'Same Game Parlay™' },
     { id: 'game_lines', name: 'Game Lines' },
-    { id: 'alt_lines', name: 'Alt Lines' },
+    { id: 'quick_bets', name: 'Quick Bets' },
     { id: 'touchdown_scorers', name: 'TD Scorers' },
     { id: 'player_props', name: 'Player Props' },
+    { id: 'player_passing', name: 'Player Passing' },
+    { id: 'player_rushing', name: 'Player Rushing' },
+    { id: 'player_receiving', name: 'Player Receiving' },
+    { id: 'alt_lines', name: 'Alt Lines' },
     { id: 'team_props', name: 'Team Props' },
+    { id: 'team_totals', name: 'Team Totals' },
     { id: 'quarters', name: 'Quarters' },
     { id: 'halves', name: 'Halves' },
+    { id: 'first_drive', name: 'First Drive' },
   ],
   Hockey: [
     { id: 'popular', name: 'Popular' },
     { id: 'same_game', name: 'Same Game Parlay™' },
     { id: 'game_lines', name: 'Game Lines' },
-    { id: 'alt_lines', name: 'Alt Lines' },
+    { id: 'quick_bets', name: 'Quick Bets' },
     { id: 'periods', name: 'Periods' },
     { id: 'goal_scorers', name: 'Goal Scorers' },
-    { id: 'player_shots', name: 'Player Shots' },
+    { id: 'first_goal', name: 'First Goal' },
+    { id: 'last_goal', name: 'Last Goal' },
     { id: 'player_points', name: 'Player Points' },
+    { id: 'player_shots', name: 'Player Shots' },
+    { id: 'player_saves', name: 'Goalie Saves' },
+    { id: 'alt_lines', name: 'Alt Lines' },
+    { id: 'puck_line', name: 'Puck Line' },
+    { id: 'team_totals', name: 'Team Totals' },
     { id: 'team_props', name: 'Team Props' },
   ],
   Tennis: [
     { id: 'popular', name: 'Popular' },
+    { id: 'same_game', name: 'Same Game Parlay™' },
     { id: 'match_lines', name: 'Match Lines' },
+    { id: 'quick_bets', name: 'Quick Bets' },
     { id: 'set_betting', name: 'Set Betting' },
+    { id: 'set_score', name: 'Set Score' },
     { id: 'games', name: 'Games' },
     { id: 'player_props', name: 'Player Props' },
+    { id: 'aces', name: 'Aces' },
+    { id: 'double_faults', name: 'Double Faults' },
     { id: 'set_props', name: 'Set Props' },
+    { id: 'alt_lines', name: 'Alt Lines' },
     { id: 'match_props', name: 'Match Props' },
+    { id: 'tie_break', name: 'Tie Break' },
   ],
 };
 
@@ -90,12 +123,16 @@ const MatchDetailsScreen: React.FC<MatchDetailsProps> = ({ route, navigation }) 
   const { match } = route.params;
   const [selectedCategory, setSelectedCategory] = useState('popular');
   const [expandedSections, setExpandedSections] = useState(new Set(['1'])); // Default first section open
+  const [betData, setBetData] = useState<BetCategories>({});
   
   // Determine sport type based on match data
   const getSportType = (): SportType => {
     if ('tieOdds' in match) return 'Soccer';
     if ('totalPoints' in match) {
-      return 'Basketball'; // Could be football too, but we'll default to basketball
+      if ('league' in match && ['NFL', 'NCAA Football', 'CFL', 'XFL', 'USFL'].includes(match.league)) {
+        return 'Football';
+      }
+      return 'Basketball';
     }
     if ('totalGoals' in match) return 'Hockey';
     if ('player1' in match) return 'Tennis';
@@ -108,6 +145,32 @@ const MatchDetailsScreen: React.FC<MatchDetailsProps> = ({ route, navigation }) 
   
   // Get categories based on sport type
   const betCategories = betCategoriesBySport[sportType] || betCategoriesBySport.Soccer;
+  
+  useEffect(() => {
+    // Set initial category to the first one in the list
+    if (betCategories.length > 0) {
+      setSelectedCategory(betCategories[0].id);
+    }
+    
+    // Load appropriate bet data based on sport type
+    switch(sportType) {
+      case 'Basketball':
+        setBetData(basketballMockBets);
+        break;
+      case 'Football':
+        setBetData(footballMockBets);
+        break;
+      case 'Hockey':
+        setBetData(hockeyMockBets);
+        break;
+      case 'Tennis':
+        setBetData(tennisMockBets);
+        break;
+      default:
+        // Default to soccer bets
+        setBetData(mockBetsByCategory);
+    }
+  }, [sportType]);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => {
@@ -120,6 +183,9 @@ const MatchDetailsScreen: React.FC<MatchDetailsProps> = ({ route, navigation }) 
       return newSet;
     });
   };
+
+  // Get the bets for the selected category
+  const categoryBets = betData[selectedCategory] || [];
 
   const renderBetSection = (bet: Bet) => {
     const isExpanded = expandedSections.has(bet.id);
@@ -275,7 +341,7 @@ const MatchDetailsScreen: React.FC<MatchDetailsProps> = ({ route, navigation }) 
 
         {/* Bet Sections */}
         <ScrollView style={styles.content}>
-          {mockBetsByCategory[selectedCategory]?.map(bet => renderBetSection(bet))}
+          {categoryBets.map(bet => renderBetSection(bet))}
         </ScrollView>
       </View>
 

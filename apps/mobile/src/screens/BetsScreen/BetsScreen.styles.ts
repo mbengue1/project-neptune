@@ -207,4 +207,16 @@ export const styles = StyleSheet.create({
     fontFamily: poppins.medium,
     color: Colors.buttonText,
   },
+  // Info message styles
+  infoMessageContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginBottom: 8,
+    backgroundColor: Colors.cardBackground,
+  },
+  infoMessageText: {
+    fontSize: 14,
+    fontFamily: poppins.regular,
+    color: Colors.textSecondary,
+  },
 }); 

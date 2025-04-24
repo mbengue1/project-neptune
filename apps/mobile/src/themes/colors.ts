@@ -2,6 +2,7 @@ export const Colors = {
   // Brand colors
   primary: '#1F41BB',        // Updated main blue color
   secondary: '#1F41BB',      // Now matches primary
+  primaryLight: '#E8EBFF',   // Light version of primary color for backgrounds
 
   // Text colors
   textPrimary: '#333333',

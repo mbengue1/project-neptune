@@ -44,7 +44,7 @@ export const styles = StyleSheet.create({
     padding: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    height: 70,
+    height: 96,
   },
   teamsSection: {
     flex: 1,
@@ -85,12 +85,12 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   oddsValue: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: poppins.medium,
     color: '#174be8',
   },
   oddsValueSmall: {
-    fontSize: 10,
+    fontSize: 12,
     fontFamily: poppins.medium,
     color: '#174be8',
   },
@@ -122,7 +122,7 @@ export const styles = StyleSheet.create({
   },
   sportOddsButton: {
     width: '90%',
-    height: 30,
+    height: 44,
     borderRadius: 4,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -130,11 +130,15 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.background,
     marginVertical: 2,
+    paddingHorizontal: 4,
+    minWidth: 64,
   },
   oddsNumber: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: poppins.medium,
     color: Colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: 2,
   },
   
   // FanDuel style betting layout
@@ -239,7 +243,37 @@ export const styles = StyleSheet.create({
   },
   betOdds: {
     fontSize: 14,
-    fontFamily: poppins.semiBold,
+    fontFamily: poppins.medium,
     color: Colors.primary,
+  },
+  oddsOnlyButton: {
+    width: '90%',
+    height: 44,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.background,
+    marginVertical: 2,
+    minWidth: 64,
+  },
+  oddsOnlyValue: {
+    fontSize: 14,
+    fontFamily: poppins.medium,
+    color: '#174be8',
+    textAlign: 'center',
+  },
+  emptyStateContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontFamily: poppins.medium,
+    color: Colors.textSecondary,
+    textAlign: 'center',
   },
 });

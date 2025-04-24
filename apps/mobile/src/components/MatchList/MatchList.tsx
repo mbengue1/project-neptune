@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../themes/colors';
 import { useNavigation } from '@react-navigation/native';
 import { getMatchesBySport } from '../../data/sportsData';
+import { getLeagueNameById } from '../../data/sportsData/leagues';
 import { 
   SoccerMatch, 
   BasketballMatch, 
@@ -31,13 +32,15 @@ type MatchListProps = {
   showMoreLink?: boolean;
   maxMatches?: number;
   showTitle?: boolean;
+  leagueFilter?: string;
 };
 
 const MatchList = ({ 
   sportType = 'Soccer', 
   showMoreLink = true, 
   maxMatches,
-  showTitle = true
+  showTitle = true,
+  leagueFilter = 'all'
 }: MatchListProps) => {
   const navigation = useNavigation<any>();
   const [matches, setMatches] = useState<any[]>([]);
@@ -63,13 +66,49 @@ const MatchList = ({
         sportMatches = getMatchesBySport(sportType);
     }
     
+    // Apply league filter
+    if (leagueFilter !== 'all') {
+      // Get the league name based on leagueFilter id
+      // This is a simplified approach - in a real app you'd get this from a proper league mapping
+      const leagueName = getLeagueNameById(sportType, leagueFilter);
+      
+      sportMatches = sportMatches.filter(match => {
+        // Check against league name
+        if (match.league === leagueName) {
+          console.log(`Match found for league: ${leagueName}`, match);
+          return true;
+        }
+        
+        // For grand slams in tennis, check against tournament names
+        if (leagueFilter === 'grandslam' && match.tournament) {
+          const isGrandSlam = ['Australian Open', 'French Open', 'Wimbledon', 'US Open'].some(
+            slam => match.tournament.includes(slam)
+          );
+          if (isGrandSlam) {
+            console.log(`Tennis Grand Slam match found`, match);
+            return true;
+          }
+        }
+        
+        // For WTA/ATP events
+        if ((leagueFilter === 'wta1000' || leagueFilter === 'masters1000') && match.tournament) {
+          if (match.tournament.includes(leagueName)) {
+            console.log(`Tennis tour match found for: ${leagueName}`, match);
+            return true;
+          }
+        }
+        
+        return false;
+      });
+    }
+    
     // If maxMatches is provided, limit the number of matches displayed
     if (maxMatches && sportMatches.length > maxMatches) {
       setMatches(sportMatches.slice(0, maxMatches));
     } else {
       setMatches(sportMatches);
     }
-  }, [sportType, maxMatches]);
+  }, [sportType, maxMatches, leagueFilter]);
   
   const navigateToSportBets = () => {
     // Navigate to Bets screen with current sport type
@@ -119,20 +158,20 @@ const MatchList = ({
         <View style={styles.oddsContainer}>
           <View style={styles.oddsColumn}>
             <Text style={styles.oddsLabel}>HOME</Text>
-            <TouchableOpacity style={styles.oddsButton}>
-              <Text style={styles.oddsValue}>{item.homeTeam.odds}</Text>
+            <TouchableOpacity style={styles.oddsOnlyButton}>
+              <Text style={styles.oddsOnlyValue}>{item.homeTeam.odds}</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.oddsColumn}>
             <Text style={styles.oddsLabel}>TIE</Text>
-            <TouchableOpacity style={styles.oddsButton}>
-              <Text style={styles.oddsValue}>{item.tieOdds}</Text>
+            <TouchableOpacity style={styles.oddsOnlyButton}>
+              <Text style={styles.oddsOnlyValue}>{item.tieOdds}</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.oddsColumn}>
             <Text style={styles.oddsLabel}>AWAY</Text>
-            <TouchableOpacity style={styles.oddsButton}>
-              <Text style={styles.oddsValue}>{item.awayTeam.odds}</Text>
+            <TouchableOpacity style={styles.oddsOnlyButton}>
+              <Text style={styles.oddsOnlyValue}>{item.awayTeam.odds}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -200,11 +239,11 @@ const MatchList = ({
             
             {/* Money Column */}
             <View style={styles.sportOddsColumn}>
-              <TouchableOpacity style={styles.sportOddsButton}>
-                <Text style={styles.oddsValueSmall}>{homeMoneyline}</Text>
+              <TouchableOpacity style={styles.oddsOnlyButton}>
+                <Text style={styles.oddsOnlyValue}>{homeMoneyline}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.sportOddsButton}>
-                <Text style={styles.oddsValueSmall}>{awayMoneyline}</Text>
+              <TouchableOpacity style={styles.oddsOnlyButton}>
+                <Text style={styles.oddsOnlyValue}>{awayMoneyline}</Text>
               </TouchableOpacity>
             </View>
             
@@ -285,11 +324,11 @@ const MatchList = ({
             
             {/* Money Column */}
             <View style={styles.sportOddsColumn}>
-              <TouchableOpacity style={styles.sportOddsButton}>
-                <Text style={styles.oddsValueSmall}>{homeMoneyline}</Text>
+              <TouchableOpacity style={styles.oddsOnlyButton}>
+                <Text style={styles.oddsOnlyValue}>{homeMoneyline}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.sportOddsButton}>
-                <Text style={styles.oddsValueSmall}>{awayMoneyline}</Text>
+              <TouchableOpacity style={styles.oddsOnlyButton}>
+                <Text style={styles.oddsOnlyValue}>{awayMoneyline}</Text>
               </TouchableOpacity>
             </View>
             
@@ -370,11 +409,11 @@ const MatchList = ({
             
             {/* Money Column */}
             <View style={styles.sportOddsColumn}>
-              <TouchableOpacity style={styles.sportOddsButton}>
-                <Text style={styles.oddsValueSmall}>{player1Moneyline}</Text>
+              <TouchableOpacity style={styles.oddsOnlyButton}>
+                <Text style={styles.oddsOnlyValue}>{player1Moneyline}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.sportOddsButton}>
-                <Text style={styles.oddsValueSmall}>{player2Moneyline}</Text>
+              <TouchableOpacity style={styles.oddsOnlyButton}>
+                <Text style={styles.oddsOnlyValue}>{player2Moneyline}</Text>
               </TouchableOpacity>
             </View>
             
@@ -439,13 +478,19 @@ const MatchList = ({
           <Text style={styles.sectionTitle}>Recommended Matches</Text>
         </View>
       }
-      <FlatList
-        data={matches}
-        keyExtractor={(item) => item?.id || Math.random().toString()}
-        renderItem={({ item }) => renderMatchCard(item)}
-        showsVerticalScrollIndicator={false}
-        ListFooterComponent={renderFooter}
-      />
+      {matches.length > 0 ? (
+        <FlatList
+          data={matches}
+          keyExtractor={(item) => item?.id || Math.random().toString()}
+          renderItem={({ item }) => renderMatchCard(item)}
+          showsVerticalScrollIndicator={false}
+          ListFooterComponent={renderFooter}
+        />
+      ) : (
+        <View style={styles.emptyStateContainer}>
+          <Text style={styles.emptyStateText}>No matches available for the selected league.</Text>
+        </View>
+      )}
     </View>
   );
 };
