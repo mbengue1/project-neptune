@@ -30,6 +30,55 @@ export const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  // Category tabs styles (matching CategoryTabs component)
+  categoryTabsContainer: {
+    backgroundColor: Colors.background,
+    paddingVertical: 8,
+    height: 50,
+    maxHeight: 50,
+  },
+  categoryTabsContent: {
+    paddingHorizontal: 12,
+    height: 34,
+  },
+  categoryTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 20,
+    marginHorizontal: 4,
+    height: 34,
+  },
+  selectedCategoryTab: {
+    backgroundColor: Colors.primary,
+  },
+  categoryTabText: {
+    color: Colors.textPrimary,
+    fontFamily: poppins.medium,
+    fontSize: 12,
+    marginLeft: 4,
+  },
+  selectedCategoryTabText: {
+    color: Colors.buttonText,
+  },
+  // Featured Players container with no bottom spacing
+  featuredPlayersContainer: {
+    marginBottom: 0,
+    paddingBottom: 0,
+  },
+  // Section headers
+  sectionHeader: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: poppins.semiBold,
+    color: Colors.textPrimary,
+  },
   // Sports categories filter
   sportsFilter: {
     paddingHorizontal: 12,

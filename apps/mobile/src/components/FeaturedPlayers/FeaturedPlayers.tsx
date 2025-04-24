@@ -43,26 +43,27 @@ const playersByCategory = {
   ],
 };
 
-// Icons for different sports
-const sportIcons: Record<string, string> = {
-  'Soccer': 'football',
-  'Basketball': 'basketball',
-  'Football': 'american-football',
-  'Hockey': 'ice-cream', // Using this since there's no hockey icon
-  'Tennis': 'tennisball',
-  'default': 'person-circle'
+// Format name to show first initial and last name
+const formatPlayerName = (fullName: string): string => {
+  const nameParts = fullName.split(' ');
+  if (nameParts.length < 2) return fullName;
+  
+  const firstName = nameParts[0];
+  const lastName = nameParts[nameParts.length - 1];
+  
+  return `${firstName.charAt(0)}. ${lastName}`;
 };
 
 interface FeaturedPlayersProps {
   sportType?: string;
+  noBottomSpacing?: boolean;
 }
 
-const FeaturedPlayers = ({ sportType = 'Soccer' }: FeaturedPlayersProps) => {
+const FeaturedPlayers = ({ sportType = 'Soccer', noBottomSpacing = false }: FeaturedPlayersProps) => {
   const players = playersByCategory[sportType as keyof typeof playersByCategory] || playersByCategory.Soccer;
-  const sportIcon = sportIcons[sportType] || sportIcons.default;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, noBottomSpacing && { paddingBottom: 0, marginBottom: 0 }]}>
       <Text style={styles.title}>Featured {sportType} Players</Text>
       <ScrollView 
         horizontal 
@@ -72,10 +73,9 @@ const FeaturedPlayers = ({ sportType = 'Soccer' }: FeaturedPlayersProps) => {
         {players.map(player => (
           <TouchableOpacity key={player.id} style={styles.playerCard}>
             <View style={styles.playerIcon}>
-              <Ionicons name={sportIcon as any} size={40} color={Colors.primary} />
+              <Ionicons name="person-circle" size={40} color={Colors.primary} />
             </View>
-            <Text style={styles.playerName}>{player.name}</Text>
-            <Text style={styles.teamName}>{player.team}</Text>
+            <Text style={styles.playerName}>{formatPlayerName(player.name)}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

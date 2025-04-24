@@ -18,32 +18,110 @@ const betStatusTabs = [
 
 // Sports categories
 const sportsCategories = [
-  { id: 'Soccer', name: 'Soccer', icon: 'football-outline' },
-  { id: 'Basketball', name: 'Basketball', icon: 'basketball-outline' },
-  { id: 'Football', name: 'Football', icon: 'american-football-outline' },
-  { id: 'Hockey', name: 'Hockey', icon: 'ice-cream-outline' },
-  { id: 'Tennis', name: 'Tennis', icon: 'tennisball-outline' },
+  { id: 'live', name: 'Live', icon: 'radio-outline' },
+  { id: 'soccer', name: 'Soccer', icon: 'football-outline' },
+  { id: 'basketball', name: 'Basketball', icon: 'basketball-outline' },
+  { id: 'football', name: 'Football', icon: 'american-football-outline' },
+  { id: 'hockey', name: 'Hockey', icon: 'ice-cream-outline' },
+  { id: 'tennis', name: 'Tennis', icon: 'tennisball-outline' },
 ];
 
-const filterTabs = [
-  { id: 'games', name: 'Games' },
-  { id: 'raining_goals', name: 'Raining Goals' },
-  { id: 'playoff_series', name: 'Top Scorers' },
-  { id: 'west', name: 'Assists' },
-];
+// Sport-specific leagues
+const leaguesBySport = {
+  Soccer: [
+    { id: 'premier', name: 'Premier League' },
+    { id: 'laliga', name: 'La Liga' },
+    { id: 'serieA', name: 'Serie A' },
+    { id: 'bundesliga', name: 'Bundesliga' },
+    { id: 'ligue1', name: 'Ligue 1' },
+  ],
+  Basketball: [
+    { id: 'nba', name: 'NBA' },
+    { id: 'wnba', name: 'WNBA' },
+    { id: 'ncaa', name: 'NCAA' },
+    { id: 'euroleague', name: 'Euroleague' },
+  ],
+  Football: [
+    { id: 'nfl', name: 'NFL' },
+    { id: 'ncaaFB', name: 'NCAA Football' },
+  ],
+  Hockey: [
+    { id: 'nhl', name: 'NHL' },
+    { id: 'khl', name: 'KHL' },
+    { id: 'ncaaH', name: 'NCAA Hockey' },
+  ],
+  Tennis: [
+    { id: 'atp', name: 'ATP' },
+    { id: 'wta', name: 'WTA' },
+    { id: 'grandSlam', name: 'Grand Slam' },
+  ],
+};
+
+// Sport-specific betting options
+const filtersBySport = {
+  Soccer: [
+    { id: 'games', name: 'Games' },
+    { id: 'goals', name: 'Raining Goals' },
+    { id: 'scorers', name: 'Top Scorers' },
+    { id: 'assists', name: 'Assist Kings' },
+    { id: 'corners', name: 'Corner Kicks' },
+  ],
+  Basketball: [
+    { id: 'gameLines', name: 'Game Lines' },
+    { id: 'spread', name: 'Spread' },
+    { id: 'moneyline', name: 'Money Line' },
+    { id: 'total', name: 'Total Points' },
+    { id: 'firstBasket', name: 'First Basket' },
+    { id: 'playerPoints', name: '10+ Points' },
+    { id: 'threePointers', name: '2+ Threes' },
+    { id: 'moreThrees', name: '4+ Threes' },
+    { id: 'playerProps', name: 'Player Props' },
+  ],
+  Football: [
+    { id: 'gameLines', name: 'Game Lines' },
+    { id: 'spread', name: 'Spread' },
+    { id: 'moneyline', name: 'Money Line' },
+    { id: 'total', name: 'Total Points' },
+    { id: 'touchdown', name: 'Anytime TD' },
+    { id: 'firstTD', name: 'First TD' },
+    { id: 'playerProps', name: 'Player Props' },
+    { id: 'quarterProps', name: 'Quarter Props' },
+  ],
+  Hockey: [
+    { id: 'gameLines', name: 'Game Lines' },
+    { id: 'puckLine', name: 'Puck Line' },
+    { id: 'moneyline', name: 'Money Line' },
+    { id: 'total', name: 'Total Goals' },
+    { id: 'anytimeGoal', name: 'Anytime Goal' },
+    { id: 'firstGoal', name: 'First Goal' },
+    { id: 'periods', name: 'First Period' },
+    { id: 'playerProps', name: 'Player Props' },
+  ],
+  Tennis: [
+    { id: 'matchLines', name: 'Match Lines' },
+    { id: 'sets', name: 'Set Winner' },
+    { id: 'games', name: 'Game Spread' },
+    { id: 'totalGames', name: 'Total Games' },
+    { id: 'aces', name: 'Total Aces' },
+    { id: 'playerProps', name: 'Player Props' },
+  ],
+};
 
 const BetsScreen = ({ route, navigation }: any) => {
-  const { sportType: initialSportType = 'Soccer' } = route.params || {};
-  const [selectedSport, setSelectedSport] = useState(initialSportType);
+  // Extract sportType from route params and use it as initial sport
+  const { sportType = 'Soccer' } = route.params || {};
+  const [selectedSport, setSelectedSport] = useState(sportType);
   const [selectedLeague, setSelectedLeague] = useState('all');
   const [selectedFilter, setSelectedFilter] = useState('games');
   const [selectedTab, setSelectedTab] = useState('view');
-  const [leagues, setLeagues] = useState(getLeaguesBySport(initialSportType));
+  const [leagues, setLeagues] = useState(leaguesBySport[sportType as keyof typeof leaguesBySport] || leaguesBySport.Soccer);
+  const [filters, setFilters] = useState(filtersBySport[sportType as keyof typeof filtersBySport] || filtersBySport.Soccer);
 
   // Update leagues when sport changes
   useEffect(() => {
-    setLeagues(getLeaguesBySport(selectedSport));
+    setLeagues(leaguesBySport[selectedSport as keyof typeof leaguesBySport] || []);
     setSelectedLeague('all'); // Reset to "All" when changing sports
+    setSelectedFilter('games');
   }, [selectedSport]);
 
   const handleSportChange = (sport: string) => {
@@ -52,42 +130,48 @@ const BetsScreen = ({ route, navigation }: any) => {
 
   const renderSportContent = () => {
     return (
-      <>
-        {/* Sports Categories */}
+      <View style={styles.content}>
+        {/* Sports categories filter */}
         <ScrollView 
           horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.sportsFilter}
+          showsHorizontalScrollIndicator={false} 
+          style={styles.categoryTabsContainer}
+          contentContainerStyle={styles.categoryTabsContent}
         >
           {sportsCategories.map(sport => (
             <TouchableOpacity
               key={sport.id}
               style={[
-                styles.sportCategory,
-                selectedSport === sport.id && styles.selectedSportCategory
+                styles.categoryTab,
+                selectedSport === sport.name && styles.selectedCategoryTab
               ]}
-              onPress={() => handleSportChange(sport.id)}
+              onPress={() => setSelectedSport(sport.name)}
             >
               <Ionicons 
                 name={sport.icon as any} 
                 size={20} 
-                color={selectedSport === sport.id ? Colors.buttonText : Colors.textPrimary} 
+                color={selectedSport === sport.name ? Colors.buttonText : Colors.textPrimary} 
               />
-              <Text style={[
-                styles.sportCategoryText,
-                selectedSport === sport.id && styles.selectedSportCategoryText
-              ]}>
+              <Text 
+                style={[
+                  styles.categoryTabText,
+                  selectedSport === sport.name && styles.selectedCategoryTabText
+                ]}
+              >
                 {sport.name}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        <FeaturedPlayers sportType={selectedSport} />
+        <FeaturedPlayers sportType={selectedSport} noBottomSpacing={true} />
 
         {/* League Filter */}
-        <ScrollView 
-          horizontal 
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Leagues</Text>
+        </View>
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.leagueFilter}
         >
@@ -111,37 +195,40 @@ const BetsScreen = ({ route, navigation }: any) => {
         </ScrollView>
 
         {/* Filter Tabs */}
-        <ScrollView 
-          horizontal 
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Betting Options</Text>
+        </View>
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.filterTabs}
         >
-          {filterTabs.map(tab => (
+          {filters.map(filter => (
             <TouchableOpacity
-              key={tab.id}
+              key={filter.id}
               style={[
                 styles.filterTab,
-                selectedFilter === tab.id && styles.selectedFilter
+                selectedFilter === filter.id && styles.selectedFilter
               ]}
-              onPress={() => setSelectedFilter(tab.id)}
+              onPress={() => setSelectedFilter(filter.id)}
             >
               <Text style={[
                 styles.filterTabText,
-                selectedFilter === tab.id && styles.selectedFilterText
+                selectedFilter === filter.id && styles.selectedFilterText
               ]}>
-                {tab.name}
+                {filter.name}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
-        
+
         {/* Match List */}
-        <MatchList 
-          sportType={selectedSport} 
-          showMoreLink={false} 
+        <MatchList
+          sportType={selectedSport}
+          showMoreLink={false}
           showTitle={false}
         />
-      </>
+      </View>
     );
   };
 
@@ -206,7 +293,7 @@ const BetsScreen = ({ route, navigation }: any) => {
       </View>
 
       {renderMainContent()}
-      
+
       <BottomNavBar navigation={navigation} />
     </SafeAreaView>
   );
