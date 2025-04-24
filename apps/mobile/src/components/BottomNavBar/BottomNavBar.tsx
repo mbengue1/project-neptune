@@ -8,7 +8,7 @@ import { Colors } from '../../themes/colors';
 const tabs = [
   { name: 'Home', icon: 'home' },
   { name: 'AI', icon: 'analytics' },
-  { name: 'Bets', icon: 'list' },
+  { name: 'My Bets', icon: 'list' },
   { name: 'Stats', icon: 'stats-chart' },
   { name: 'Account', icon: 'person' },
 ];
@@ -35,7 +35,7 @@ const BottomNavBar = ({ navigation }: any) => {
     if (routeName === 'Main') {
       setActiveTab('Home');
     } else if (routeName === 'Bets') {
-      setActiveTab('Bets');
+      setActiveTab('My Bets');
     } else if (
       routeName === 'Profile' || 
       routeName === 'ProfileDetails' || 
@@ -57,7 +57,7 @@ const BottomNavBar = ({ navigation }: any) => {
       navigation.navigate('Main');
     } else if (tabName === 'Account') {
       navigation.navigate('Profile');
-    } else if (tabName === 'Bets') {
+    } else if (tabName === 'My Bets') {
       navigation.navigate('Bets', { sportType: 'All' });
     } else {
       // For other tabs, navigate to a temporary screen with the tab name as a parameter
@@ -74,7 +74,7 @@ const BottomNavBar = ({ navigation }: any) => {
           onPress={() => handleTabPress(tab.name)}
         >
           <Ionicons 
-            name={activeTab === tab.name ? tab.icon : `${tab.icon}-outline`} 
+            name={(activeTab === tab.name ? tab.icon : `${tab.icon}-outline`) as any} 
             size={24} 
             color={activeTab === tab.name ? Colors.primary : Colors.textSecondary} 
           />

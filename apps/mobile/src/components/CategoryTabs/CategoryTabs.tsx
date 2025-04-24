@@ -6,6 +6,8 @@ import { Colors } from '../../themes/colors';
 
 // sports categories with their respective icons
 const categories = [
+  { name: 'All', icon: 'apps-outline' },
+  { name: 'Live', icon: 'radio-outline' },
   { name: 'Soccer', icon: 'football-outline' },
   { name: 'Basketball', icon: 'basketball-outline' },
   { name: 'Football', icon: 'american-football-outline' },
@@ -13,8 +15,21 @@ const categories = [
   { name: 'Tennis', icon: 'tennisball-outline' },
 ];
 
-const CategoryTabs = () => {
-  const [selectedCategory, setSelectedCategory] = useState('Soccer');
+type CategoryTabsProps = {
+  onCategoryChange?: (category: string) => void;
+};
+
+const CategoryTabs = ({ onCategoryChange }: CategoryTabsProps) => {
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  const handleCategoryPress = (categoryName: string) => {
+    setSelectedCategory(categoryName);
+    
+    // Notify parent component of category change if callback is provided
+    if (onCategoryChange) {
+      onCategoryChange(categoryName);
+    }
+  };
 
   return (
     <ScrollView 
@@ -30,7 +45,7 @@ const CategoryTabs = () => {
             styles.tab,
             selectedCategory === category.name && styles.selectedTab
           ]}
-          onPress={() => setSelectedCategory(category.name)}
+          onPress={() => handleCategoryPress(category.name)}
         >
           <Ionicons 
             name={category.icon as any} 

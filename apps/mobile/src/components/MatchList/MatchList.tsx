@@ -1,72 +1,63 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { styles } from './MatchList.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../themes/colors';
 import { useNavigation } from '@react-navigation/native';
+import { getMatchesBySport } from '../../data/sportsData';
 
-// Updated sample match data with more matches
-const matches = [
-  { 
-    id: '1',
-    league: 'Premier League',
-    date: '3:00PM ET',
-    homeTeam: {
-      name: 'Manchester City',
-      odds: '-115'
-    },
-    awayTeam: {
-      name: 'Aston Villa',
-      odds: '+290'
-    },
-    tieOdds: '+290'
-  },
-  { 
-    id: '2',
-    league: 'Premier League',
-    date: 'WED 3:00PM ET',
-    homeTeam: {
-      name: 'Arsenal',
-      odds: '-270'
-    },
-    awayTeam: {
-      name: 'Crystal Palace',
-      odds: '+800'
-    },
-    tieOdds: '+370'
-  },
-  {
-    id: '3',
-    league: 'Premier League',
-    date: 'WED 3:15PM ET',
-    homeTeam: {
-      name: 'Liverpool',
-      odds: '-180'
-    },
-    awayTeam: {
-      name: 'Chelsea',
-      odds: '+450'
-    },
-    tieOdds: '+310'
-  },
-  {
-    id: '4',
-    league: 'La Liga',
-    date: 'THU 4:00PM ET',
-    homeTeam: {
-      name: 'Barcelona',
-      odds: '-150'
-    },
-    awayTeam: {
-      name: 'Real Madrid',
-      odds: '+320'
-    },
-    tieOdds: '+280'
-  }
-];
+// Define match type
+export type MatchType = {
+  id: string;
+  league: string;
+  date: string;
+  homeTeam: {
+    name: string;
+    odds: string;
+  };
+  awayTeam: {
+    name: string;
+    odds: string;
+  };
+  tieOdds: string;
+};
 
-const MatchList = ({ sportType = 'Soccer', showMoreLink = true }) => {
-  const navigation = useNavigation();
+// Icons for different sports
+const sportIcons: Record<string, string> = {
+  'Soccer': 'football',
+  'Basketball': 'basketball',
+  'Football': 'american-football',
+  'Hockey': 'ice-cream', // Using this since there's no hockey icon
+  'Tennis': 'tennisball'
+};
+
+type MatchListProps = {
+  sportType?: string;
+  showMoreLink?: boolean;
+  maxMatches?: number;
+  showTitle?: boolean;
+};
+
+const MatchList = ({ 
+  sportType = 'Soccer', 
+  showMoreLink = true, 
+  maxMatches,
+  showTitle = true
+}: MatchListProps) => {
+  const navigation = useNavigation<any>();
+  const [matches, setMatches] = useState<MatchType[]>([]);
+  
+  useEffect(() => {
+    // Fetch matches based on sportType
+    const sportMatches = getMatchesBySport(sportType);
+    
+    // If maxMatches is provided, limit the number of matches displayed
+    if (maxMatches && sportMatches.length > maxMatches) {
+      setMatches(sportMatches.slice(0, maxMatches));
+    } else {
+      setMatches(sportMatches);
+    }
+  }, [sportType, maxMatches]);
   
   const navigateToSportBets = () => {
     // This will navigate to the bets page with the specific sport type
@@ -88,9 +79,12 @@ const MatchList = ({ sportType = 'Soccer', showMoreLink = true }) => {
     );
   };
 
+  // Select the appropriate icon for the sport type
+  const sportIcon = sportIcons[sportType] || 'football';
+
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Recommended Matches</Text>
+      {showTitle && <Text style={styles.sectionTitle}>Recommended Matches</Text>}
       <FlatList
         data={matches}
         keyExtractor={(item) => item.id}
@@ -108,11 +102,11 @@ const MatchList = ({ sportType = 'Soccer', showMoreLink = true }) => {
                 {/* Teams Section */}
                 <View style={styles.teamsSection}>
                   <View style={styles.teamRow}>
-                    <Ionicons name="football" size={20} color={Colors.textPrimary} />
+                    <Ionicons name={sportIcon as any} size={20} color={Colors.textPrimary} />
                     <Text style={styles.teamName}>{item.homeTeam.name}</Text>
                   </View>
                   <View style={styles.teamRow}>
-                    <Ionicons name="football" size={20} color={Colors.textPrimary} />
+                    <Ionicons name={sportIcon as any} size={20} color={Colors.textPrimary} />
                     <Text style={styles.teamName}>{item.awayTeam.name}</Text>
                   </View>
                 </View>

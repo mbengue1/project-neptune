@@ -6,7 +6,7 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingBottom: 0,
   },
   sectionTitle: {
     fontSize: 18,
