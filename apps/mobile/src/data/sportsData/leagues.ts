@@ -112,22 +112,22 @@ export const leaguesByCategory = {
       }
     },
     { 
-      id: 'wnba', 
-      name: 'WNBA', 
-      country: 'USA', 
-      logo: 'wnba',
+      id: 'euroleague', 
+      name: 'EuroLeague', 
+      region: 'Europe', 
+      logo: 'euroleague',
       playerProps: {
-        points: [10, 15, 20, 25],
-        rebounds: [5, 8, 10, 12],
-        assists: [3, 5, 7, 9],
+        points: [10, 15, 20],
+        rebounds: [5, 8, 10],
+        assists: [3, 5, 7],
         threes: [2, 3, 4],
-        steals: [1, 2, 3],
-        blocks: [1, 2, 3]
+        steals: [1, 2],
+        blocks: [1, 2]
       }
     },
     { 
-      id: 'ncaam', 
-      name: 'NCAA Men', 
+      id: 'ncaa', 
+      name: 'NCAA', 
       country: 'USA', 
       logo: 'ncaam',
       playerProps: {
@@ -140,17 +140,17 @@ export const leaguesByCategory = {
       }
     },
     { 
-      id: 'euroleague', 
-      name: 'EuroLeague', 
-      region: 'Europe', 
-      logo: 'euroleague',
+      id: 'wnba', 
+      name: 'WNBA', 
+      country: 'USA', 
+      logo: 'wnba',
       playerProps: {
-        points: [10, 15, 20],
-        rebounds: [5, 8, 10],
-        assists: [3, 5, 7],
+        points: [10, 15, 20, 25],
+        rebounds: [5, 8, 10, 12],
+        assists: [3, 5, 7, 9],
         threes: [2, 3, 4],
-        steals: [1, 2],
-        blocks: [1, 2]
+        steals: [1, 2, 3],
+        blocks: [1, 2, 3]
       }
     },
   ],
@@ -174,7 +174,7 @@ export const leaguesByCategory = {
     },
     { 
       id: 'ncaaf', 
-      name: 'NCAA Football', 
+      name: 'NCAAF', 
       country: 'USA', 
       logo: 'ncaaf',
       playerProps: {
@@ -184,6 +184,22 @@ export const leaguesByCategory = {
         touchdowns: [1, 2],
         receptions: [3, 5],
         tackles: [5, 8],
+        sacks: [1, 2],
+        interceptions: [1]
+      }
+    },
+    { 
+      id: 'xfl', 
+      name: 'XFL', 
+      country: 'USA', 
+      logo: 'xfl',
+      playerProps: {
+        passing: [125, 175, 225, 275],
+        rushing: [20, 40, 60, 80],
+        receiving: [20, 40, 60],
+        touchdowns: [1, 2],
+        receptions: [2, 4, 6],
+        tackles: [4, 6, 8],
         sacks: [1, 2],
         interceptions: [1]
       }
@@ -222,6 +238,22 @@ export const leaguesByCategory = {
         hits: [2, 3],
         faceoffWins: [5, 8]
       }
+    },
+    { 
+      id: 'shl', 
+      name: 'SHL', 
+      country: 'Sweden', 
+      logo: 'shl',
+      playerProps: {
+        goals: [1, 2],
+        assists: [1, 2],
+        hockeyPoints: [1, 2],
+        shots: [2, 3, 4],
+        saves: [18, 22, 26],
+        blocks: [1, 2],
+        hits: [2, 3],
+        faceoffWins: [4, 7]
+      }
     }
   ],
   Tennis: [
@@ -244,6 +276,7 @@ export const leaguesByCategory = {
       id: 'masters1000', 
       name: 'Masters 1000', 
       type: 'ATP',
+      tournaments: ['Miami Masters 1000', 'Indian Wells Masters 1000'],
       playerProps: {
         aces: [5, 8, 10, 12],
         doubleFaults: [2, 3, 4],
@@ -257,6 +290,7 @@ export const leaguesByCategory = {
       id: 'wta1000', 
       name: 'WTA 1000', 
       type: 'WTA',
+      tournaments: ['WTA 1000 Madrid', 'WTA 1000 Rome', 'WTA 1000 Cincinnati'],
       playerProps: {
         aces: [3, 5, 7],
         doubleFaults: [2, 3, 4],
@@ -348,16 +382,18 @@ export const getLeagueNameById = (sportType: string, leagueId: string): string =
     // Basketball
     'nba': 'NBA',
     'wnba': 'WNBA',
-    'ncaam': 'NCAA Men',
+    'ncaa': 'NCAA',
     'euroleague': 'EuroLeague',
     
     // Football
     'nfl': 'NFL',
-    'ncaaf': 'NCAA Football',
+    'ncaaf': 'NCAAF',
+    'xfl': 'XFL',
     
     // Hockey
     'nhl': 'NHL',
     'khl': 'KHL',
+    'shl': 'SHL',
     
     // Tennis
     'grandslam': 'Grand Slam',

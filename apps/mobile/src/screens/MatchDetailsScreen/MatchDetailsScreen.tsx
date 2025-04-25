@@ -5,31 +5,41 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../themes/colors';
 import BottomNavBar from '../../components/BottomNavBar/BottomNavBar';
 import { 
-  mockBetsByCategory, 
-  basketballMockBets, 
-  footballMockBets,
-  hockeyMockBets,
-  tennisMockBets,
-  BetOption, 
-  Bet, 
-  BetCategories 
-} from '../../data/mockBets';
-import { 
-  SoccerMatch, 
-  BasketballMatch, 
-  FootballMatch, 
-  HockeyMatch, 
-  TennisMatch 
-} from '../../data/sportsBettingTypes';
+  basketballBetCategories,
+  footballBetCategories,
+  hockeyBetCategories,
+  tennisBetCategories,
+  soccerBetCategories
+} from '../../data/sportsData';
+import type { MatchType } from '../../types/matches';
+
+// Extended MatchType with optional tournament field
+interface ExtendedMatch extends MatchType {
+  tournament?: string;
+}
 
 // Define sport types
 type SportType = 'Soccer' | 'Basketball' | 'Football' | 'Hockey' | 'Tennis';
 
-// Define a union type for all possible match types
-type MatchType = SoccerMatch | BasketballMatch | FootballMatch | HockeyMatch | TennisMatch;
+// Define bet option type
+type BetOption = {
+  label: string;
+  value: string;
+  team?: string;
+};
+
+// Define bet type
+type Bet = {
+  id: string;
+  title: string;
+  description?: string;
+  sgp: boolean;
+  options: BetOption[];
+};
 
 interface RouteParams {
-  match: MatchType;
+  match: ExtendedMatch;
+  sportType: SportType;
 }
 
 interface MatchDetailsProps {
@@ -41,107 +51,38 @@ interface MatchDetailsProps {
 const betCategoriesBySport: Record<SportType, Array<{ id: string; name: string }>> = {
   Soccer: [
     { id: 'popular', name: 'Popular' },
-    { id: 'same_game', name: 'Same Game Parlay™' },
-    { id: 'specials', name: 'Specials' },
-    { id: 'goal_scorers', name: 'Goal Scorers' },
-    { id: 'goals', name: 'Goals' },
-    { id: 'team_props', name: 'Team Props' },
-    { id: 'shots_target', name: 'Shots on Target' },
-    { id: 'shots', name: 'Shots' },
-    { id: 'corners', name: 'Corners' },
+    { id: 'player_props', name: 'Player Props' },
+    { id: 'game_props', name: 'Game Props' }
   ],
   Basketball: [
     { id: 'popular', name: 'Popular' },
-    { id: 'same_game', name: 'Same Game Parlay™' },
-    { id: 'game_lines', name: 'Game Lines' },
-    { id: 'quick_bets', name: 'Quick Bets' },
-    { id: 'player_points', name: 'Player Points' },
-    { id: 'player_combos', name: 'Player Combos' },
-    { id: 'player_threes', name: 'Player 3-Pointers' },
-    { id: 'player_rebounds', name: 'Player Rebounds' },
-    { id: 'player_assists', name: 'Player Assists' },
-    { id: 'alt_lines', name: 'Alt Lines' },
-    { id: 'quarters', name: 'Quarters' },
-    { id: 'halves', name: 'Halves' },
-    { id: 'first_basket', name: 'First Basket' },
-    { id: 'team_totals', name: 'Team Totals' },
-    { id: 'race_to', name: 'Race To' },
+    { id: 'player_props', name: 'Player Props' },
+    { id: 'game_props', name: 'Game Props' }
   ],
   Football: [
     { id: 'popular', name: 'Popular' },
-    { id: 'same_game', name: 'Same Game Parlay™' },
-    { id: 'game_lines', name: 'Game Lines' },
-    { id: 'quick_bets', name: 'Quick Bets' },
-    { id: 'touchdown_scorers', name: 'TD Scorers' },
     { id: 'player_props', name: 'Player Props' },
-    { id: 'player_passing', name: 'Player Passing' },
-    { id: 'player_rushing', name: 'Player Rushing' },
-    { id: 'player_receiving', name: 'Player Receiving' },
-    { id: 'alt_lines', name: 'Alt Lines' },
-    { id: 'team_props', name: 'Team Props' },
-    { id: 'team_totals', name: 'Team Totals' },
-    { id: 'quarters', name: 'Quarters' },
-    { id: 'halves', name: 'Halves' },
-    { id: 'first_drive', name: 'First Drive' },
+    { id: 'game_props', name: 'Game Props' },
+    { id: 'quarter_props', name: 'Quarter Props' }
   ],
   Hockey: [
     { id: 'popular', name: 'Popular' },
-    { id: 'same_game', name: 'Same Game Parlay™' },
-    { id: 'game_lines', name: 'Game Lines' },
-    { id: 'quick_bets', name: 'Quick Bets' },
-    { id: 'periods', name: 'Periods' },
-    { id: 'goal_scorers', name: 'Goal Scorers' },
-    { id: 'first_goal', name: 'First Goal' },
-    { id: 'last_goal', name: 'Last Goal' },
-    { id: 'player_points', name: 'Player Points' },
-    { id: 'player_shots', name: 'Player Shots' },
-    { id: 'player_saves', name: 'Goalie Saves' },
-    { id: 'alt_lines', name: 'Alt Lines' },
-    { id: 'puck_line', name: 'Puck Line' },
-    { id: 'team_totals', name: 'Team Totals' },
-    { id: 'team_props', name: 'Team Props' },
+    { id: 'player_props', name: 'Player Props' },
+    { id: 'game_props', name: 'Game Props' }
   ],
   Tennis: [
     { id: 'popular', name: 'Popular' },
-    { id: 'same_game', name: 'Same Game Parlay™' },
-    { id: 'match_lines', name: 'Match Lines' },
-    { id: 'quick_bets', name: 'Quick Bets' },
-    { id: 'set_betting', name: 'Set Betting' },
-    { id: 'set_score', name: 'Set Score' },
-    { id: 'games', name: 'Games' },
-    { id: 'player_props', name: 'Player Props' },
-    { id: 'aces', name: 'Aces' },
-    { id: 'double_faults', name: 'Double Faults' },
     { id: 'set_props', name: 'Set Props' },
-    { id: 'alt_lines', name: 'Alt Lines' },
-    { id: 'match_props', name: 'Match Props' },
-    { id: 'tie_break', name: 'Tie Break' },
+    { id: 'game_props', name: 'Game Props' },
+    { id: 'match_props', name: 'Match Props' }
   ],
 };
 
 const MatchDetailsScreen: React.FC<MatchDetailsProps> = ({ route, navigation }) => {
-  const { match } = route.params;
+  const { match, sportType } = route.params;
   const [selectedCategory, setSelectedCategory] = useState('popular');
   const [expandedSections, setExpandedSections] = useState(new Set(['1'])); // Default first section open
-  const [betData, setBetData] = useState<BetCategories>({});
-  
-  // Determine sport type based on match data
-  const getSportType = (): SportType => {
-    if ('tieOdds' in match) return 'Soccer';
-    if ('totalPoints' in match) {
-      if ('league' in match && ['NFL', 'NCAA Football', 'CFL', 'XFL', 'USFL'].includes(match.league)) {
-        return 'Football';
-      }
-      return 'Basketball';
-    }
-    if ('totalGoals' in match) return 'Hockey';
-    if ('player1' in match) return 'Tennis';
-    
-    // Default to Soccer if can't determine
-    return 'Soccer';
-  };
-  
-  const sportType = getSportType();
+  const [betData, setBetData] = useState<Record<string, Bet[]>>({});
   
   // Get categories based on sport type
   const betCategories = betCategoriesBySport[sportType] || betCategoriesBySport.Soccer;
@@ -155,20 +96,23 @@ const MatchDetailsScreen: React.FC<MatchDetailsProps> = ({ route, navigation }) 
     // Load appropriate bet data based on sport type
     switch(sportType) {
       case 'Basketball':
-        setBetData(basketballMockBets);
+        setBetData(basketballBetCategories);
         break;
       case 'Football':
-        setBetData(footballMockBets);
+        setBetData(footballBetCategories);
         break;
       case 'Hockey':
-        setBetData(hockeyMockBets);
+        setBetData(hockeyBetCategories);
         break;
       case 'Tennis':
-        setBetData(tennisMockBets);
+        setBetData(tennisBetCategories);
+        break;
+      case 'Soccer':
+        setBetData(soccerBetCategories);
         break;
       default:
         // Default to soccer bets
-        setBetData(mockBetsByCategory);
+        setBetData(soccerBetCategories);
     }
   }, [sportType]);
 
@@ -246,41 +190,20 @@ const MatchDetailsScreen: React.FC<MatchDetailsProps> = ({ route, navigation }) 
 
   const sportIcon = getSportIcon();
   
-  // Render team/player names based on sport type
+  // Render team/player names
   const renderTeamPlayers = () => {
-    if (sportType === 'Tennis' && 'player1' in match) {
-      // Tennis match
-      const tennisMatch = match as TennisMatch;
-      return (
-        <>
-          <View style={styles.teamRow}>
-            <Ionicons name={sportIcon} size={24} color={Colors.textPrimary} />
-            <Text style={styles.teamName}>{tennisMatch.player1.name}</Text>
-          </View>
-          <View style={styles.teamRow}>
-            <Ionicons name={sportIcon} size={24} color={Colors.textPrimary} />
-            <Text style={styles.teamName}>{tennisMatch.player2.name}</Text>
-          </View>
-        </>
-      );
-    } else if ('homeTeam' in match) {
-      // Team sports
-      return (
-        <>
-          <View style={styles.teamRow}>
-            <Ionicons name={sportIcon} size={24} color={Colors.textPrimary} />
-            <Text style={styles.teamName}>{match.homeTeam.name}</Text>
-          </View>
-          <View style={styles.teamRow}>
-            <Ionicons name={sportIcon} size={24} color={Colors.textPrimary} />
-            <Text style={styles.teamName}>{match.awayTeam.name}</Text>
-          </View>
-        </>
-      );
-    }
-    
-    // Fallback if structure doesn't match expected
-    return null;
+    return (
+      <>
+        <View style={styles.teamRow}>
+          <Ionicons name={sportIcon} size={24} color={Colors.textPrimary} />
+          <Text style={styles.teamName}>{match.homeTeam.name}</Text>
+        </View>
+        <View style={styles.teamRow}>
+          <Ionicons name={sportIcon} size={24} color={Colors.textPrimary} />
+          <Text style={styles.teamName}>{match.awayTeam.name}</Text>
+        </View>
+      </>
+    );
   };
 
   return (
@@ -295,9 +218,9 @@ const MatchDetailsScreen: React.FC<MatchDetailsProps> = ({ route, navigation }) 
         </TouchableOpacity>
         <View style={styles.matchInfo}>
           <Text style={styles.leagueTitle}>
-            {'league' in match ? match.league : ('tournament' in match ? match.tournament : '')}
+            {match.tournament || match.league}
           </Text>
-          <Text style={styles.gamesAvailable}>20 Games Available</Text>
+          <Text style={styles.gamesAvailable}>{categoryBets.length} Bets Available</Text>
         </View>
         <TouchableOpacity style={styles.searchButton}>
           <Ionicons name="search" size={24} color={Colors.textPrimary} />
