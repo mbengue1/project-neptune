@@ -219,4 +219,34 @@ export const styles = StyleSheet.create({
     fontFamily: poppins.regular,
     color: Colors.textSecondary,
   },
+  // Selected bets styles
+  selectedBetsContainer: {
+    flex: 1,
+  },
+  selectedBetsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: Colors.primaryLight,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  selectedBetsTitle: {
+    fontSize: 16,
+    fontFamily: poppins.semiBold,
+    color: Colors.textPrimary,
+  },
+  expandBetsButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+  expandBetsButtonText: {
+    fontSize: 12,
+    fontFamily: poppins.medium,
+    color: Colors.buttonText,
+  },
 }); 

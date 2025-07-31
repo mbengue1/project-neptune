@@ -4,6 +4,7 @@ import { styles } from './MatchList.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../themes/colors';
 import { useNavigation } from '@react-navigation/native';
+import { useBetSelection } from '../../features/betting/BetSelectionContext/BetSelectionContext';
 import { 
   getMatchesBySport, 
   basketballMatches,
@@ -46,6 +47,7 @@ const MatchList = ({
 }: MatchListProps) => {
   const navigation = useNavigation<any>();
   const [matches, setMatches] = useState<ExtendedMatch[]>([]);
+  const { addBet, removeBetByMatchAndOdds, isBetSelected } = useBetSelection();
   
   useEffect(() => {
     // Get sport-specific matches
@@ -186,6 +188,28 @@ const MatchList = ({
   // Since all our sports data models have been simplified to the basic MatchType,
   // we'll use the same rendering function for all sports
   const renderMatch = (item: ExtendedMatch) => {
+    const handleBetSelection = (team: string, odds: string, betType: string) => {
+      const betOption = `${team} ${betType}`;
+      const isSelected = isBetSelected(item.id, odds);
+      
+      if (isSelected) {
+        // If already selected, remove the bet
+        removeBetByMatchAndOdds(item.id, odds);
+      } else {
+        // If not selected, add the bet
+        addBet({
+          matchId: item.id,
+          matchTitle: `${item.homeTeam.name} vs ${item.awayTeam.name}`,
+          betTitle: `${team} ${betType}`,
+          betOption: team,
+          odds: odds,
+          team: team,
+          sportType,
+          league: item.league,
+        });
+      }
+    };
+
     // Common rendering for all match types
     return (
       <View style={styles.card}>
@@ -213,22 +237,55 @@ const MatchList = ({
           <View style={styles.oddsContainer}>
             <View style={styles.oddsColumn}>
               <Text style={styles.oddsLabel}>HOME</Text>
-              <TouchableOpacity style={styles.oddsOnlyButton}>
-                <Text style={styles.oddsOnlyValue}>{item.homeTeam.odds}</Text>
+              <TouchableOpacity 
+                style={[
+                  styles.oddsOnlyButton,
+                  isBetSelected(item.id, item.homeTeam.odds) && styles.selectedOddsButton
+                ]}
+                onPress={() => handleBetSelection(item.homeTeam.name, item.homeTeam.odds, 'WIN')}
+              >
+                <Text style={[
+                  styles.oddsOnlyValue,
+                  isBetSelected(item.id, item.homeTeam.odds) && styles.selectedOddsValue
+                ]}>
+                  {item.homeTeam.odds}
+                </Text>
               </TouchableOpacity>
             </View>
             {item.tieOdds && (
               <View style={styles.oddsColumn}>
                 <Text style={styles.oddsLabel}>TIE</Text>
-                <TouchableOpacity style={styles.oddsOnlyButton}>
-                  <Text style={styles.oddsOnlyValue}>{item.tieOdds}</Text>
+                <TouchableOpacity 
+                  style={[
+                    styles.oddsOnlyButton,
+                    isBetSelected(item.id, item.tieOdds) && styles.selectedOddsButton
+                  ]}
+                  onPress={() => handleBetSelection('TIE', item.tieOdds || '', 'DRAW')}
+                >
+                  <Text style={[
+                    styles.oddsOnlyValue,
+                    isBetSelected(item.id, item.tieOdds || '') && styles.selectedOddsValue
+                  ]}>
+                    {item.tieOdds}
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
             <View style={styles.oddsColumn}>
               <Text style={styles.oddsLabel}>AWAY</Text>
-              <TouchableOpacity style={styles.oddsOnlyButton}>
-                <Text style={styles.oddsOnlyValue}>{item.awayTeam.odds}</Text>
+              <TouchableOpacity 
+                style={[
+                  styles.oddsOnlyButton,
+                  isBetSelected(item.id, item.awayTeam.odds) && styles.selectedOddsButton
+                ]}
+                onPress={() => handleBetSelection(item.awayTeam.name, item.awayTeam.odds, 'WIN')}
+              >
+                <Text style={[
+                  styles.oddsOnlyValue,
+                  isBetSelected(item.id, item.awayTeam.odds) && styles.selectedOddsValue
+                ]}>
+                  {item.awayTeam.odds}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

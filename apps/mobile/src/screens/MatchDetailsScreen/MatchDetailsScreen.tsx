@@ -4,6 +4,7 @@ import { styles } from './MatchDetailsScreen.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../themes/colors';
 import BottomNavBar from '../../components/BottomNavBar/BottomNavBar';
+import { useBetSelection } from '../../features/betting/BetSelectionContext/BetSelectionContext';
 import { 
   basketballBetCategories,
   footballBetCategories,
@@ -83,6 +84,7 @@ const MatchDetailsScreen: React.FC<MatchDetailsProps> = ({ route, navigation }) 
   const [selectedCategory, setSelectedCategory] = useState('popular');
   const [expandedSections, setExpandedSections] = useState(new Set(['1'])); // Default first section open
   const [betData, setBetData] = useState<Record<string, Bet[]>>({});
+  const { addBet, removeBetByMatchAndOdds, isBetSelected } = useBetSelection();
   
   // Get categories based on sport type
   const betCategories = betCategoriesBySport[sportType] || betCategoriesBySport.Soccer;
@@ -134,6 +136,27 @@ const MatchDetailsScreen: React.FC<MatchDetailsProps> = ({ route, navigation }) 
   const renderBetSection = (bet: Bet) => {
     const isExpanded = expandedSections.has(bet.id);
 
+    const handleBetSelection = (option: BetOption) => {
+      const isSelected = isBetSelected(match.id, option.value);
+      
+      if (isSelected) {
+        // If already selected, remove the bet
+        removeBetByMatchAndOdds(match.id, option.value);
+      } else {
+        // If not selected, add the bet
+        addBet({
+          matchId: match.id,
+          matchTitle: `${match.homeTeam.name} vs ${match.awayTeam.name}`,
+          betTitle: bet.title,
+          betOption: option.label,
+          odds: option.value,
+          team: option.team,
+          sportType,
+          league: match.league,
+        });
+      }
+    };
+
     return (
       <View key={bet.id} style={styles.betSection}>
         <TouchableOpacity 
@@ -162,14 +185,28 @@ const MatchDetailsScreen: React.FC<MatchDetailsProps> = ({ route, navigation }) 
               <Text style={styles.betDescription}>{bet.description}</Text>
             )}
             <View style={styles.oddsContainer}>
-              {bet.options.map((option: BetOption, index: number) => (
-                <View key={index} style={styles.oddsRow}>
-                  <Text style={styles.oddsLabel}>{option.label}</Text>
-                  <TouchableOpacity style={styles.oddsButton}>
-                    <Text style={styles.oddsValue}>{option.value}</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
+              {bet.options.map((option: BetOption, index: number) => {
+                const isSelected = isBetSelected(match.id, option.value);
+                return (
+                  <View key={index} style={styles.oddsRow}>
+                    <Text style={styles.oddsLabel}>{option.label}</Text>
+                    <TouchableOpacity 
+                      style={[
+                        styles.oddsButton,
+                        isSelected && styles.selectedOddsButton
+                      ]}
+                      onPress={() => handleBetSelection(option)}
+                    >
+                      <Text style={[
+                        styles.oddsValue,
+                        isSelected && styles.selectedOddsValue
+                      ]}>
+                        {option.value}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
             </View>
           </>
         )}

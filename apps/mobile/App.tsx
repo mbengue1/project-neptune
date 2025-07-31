@@ -1,6 +1,8 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
 import { AuthProvider } from './src/features/auth/AuthContext/AuthContext';
+import { BetSelectionProvider } from './src/features/betting/BetSelectionContext/BetSelectionContext';
+import GlobalBetSlip from './src/components/GlobalBetSlip/GlobalBetSlip';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { Colors } from './src/themes/colors';
 import { useFonts } from 'expo-font';
@@ -20,8 +22,11 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
-      <AppNavigator />
+      <BetSelectionProvider>
+        <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+        <AppNavigator />
+        <GlobalBetSlip />
+      </BetSelectionProvider>
     </AuthProvider>
   );
 }

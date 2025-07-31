@@ -264,6 +264,22 @@ export const styles = StyleSheet.create({
     color: '#174be8',
     textAlign: 'center',
   },
+  selectedOddsButton: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  selectedOddsValue: {
+    color: Colors.buttonText,
+    fontFamily: poppins.semiBold,
+  },
   emptyStateContainer: {
     flex: 1,
     alignItems: 'center',

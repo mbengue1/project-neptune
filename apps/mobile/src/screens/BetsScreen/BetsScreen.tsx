@@ -7,6 +7,7 @@ import FeaturedPlayers from '../../components/FeaturedPlayers/FeaturedPlayers';
 import PlayerBets from '../../components/PlayerBets/PlayerBets';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../themes/colors';
+import { useBetSelection } from '../../features/betting/BetSelectionContext/BetSelectionContext';
 import { getLeaguesBySport, getPlayerPropThresholds, getPropDisplayName, getLeagueNameById } from '../../data/sportsData/leagues';
 import { getMatchesBySport } from '../../data/sportsData';
 import { 
@@ -111,6 +112,7 @@ const BetsScreen = ({ route, navigation }: any) => {
   const [filters, setFilters] = useState(filtersBySport[sportType as keyof typeof filtersBySport] || filtersBySport.Soccer);
   const [playerBets, setPlayerBets] = useState<PlayerBet[]>([]);
   const [showPlayerBets, setShowPlayerBets] = useState(false);
+  const { getBetCount } = useBetSelection();
 
   // Update leagues when sport changes
   useEffect(() => {
@@ -495,11 +497,27 @@ const BetsScreen = ({ route, navigation }: any) => {
 
   const renderMainContent = () => {
     if (selectedTab === 'view') {
-      return (
-        <ScrollView style={styles.content}>
-          {renderSportContent()}
-        </ScrollView>
-      );
+      const betCount = getBetCount();
+      if (betCount > 0) {
+        return (
+          <View style={styles.selectedBetsContainer}>
+            <View style={styles.selectedBetsHeader}>
+              <Text style={styles.selectedBetsTitle}>
+                {betCount} {betCount === 1 ? 'Bet Selected' : 'Bets Selected'}
+              </Text>
+            </View>
+            <ScrollView style={styles.content}>
+              {renderSportContent()}
+            </ScrollView>
+          </View>
+        );
+      } else {
+        return (
+          <ScrollView style={styles.content}>
+            {renderSportContent()}
+          </ScrollView>
+        );
+      }
     } else if (selectedTab === 'open') {
       return (
         <View style={styles.emptyStateContainer}>
