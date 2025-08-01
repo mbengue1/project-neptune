@@ -249,4 +249,17 @@ export const styles = StyleSheet.create({
     fontFamily: poppins.medium,
     color: Colors.buttonText,
   },
+  // Bet list section header styles
+  betListSectionHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    backgroundColor: Colors.background,
+  },
+  betListSectionTitle: {
+    fontSize: 16,
+    fontFamily: poppins.semiBold,
+    color: Colors.textPrimary,
+  },
 }); 

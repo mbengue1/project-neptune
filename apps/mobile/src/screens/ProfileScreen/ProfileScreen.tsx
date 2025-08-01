@@ -5,10 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../themes/colors';
 import BottomNavBar from '../../components/BottomNavBar/BottomNavBar';
 import { useAuth } from '../../features/auth/AuthContext/AuthContext';
+import { useUserBalance } from '../../features/betting/UserBalanceContext/UserBalanceContext';
 import { PasswordConfirmModal } from '../../components/PasswordConfirm/PasswordConfirmModal';
 
 const ProfileScreen = ({ navigation }: any) => {
   const { logout, userData, user, updateUsername, updateEmail } = useAuth();
+  const { balance } = useUserBalance();
   const [isDarkMode, setIsDarkMode] = React.useState(false);
   const [isNotificationsEnabled, setIsNotificationsEnabled] = React.useState(true);
   const [isEditing, setIsEditing] = useState<'username' | 'email' | null>(null);
@@ -91,7 +93,7 @@ const ProfileScreen = ({ navigation }: any) => {
             </View>
             <View style={styles.balanceContainer}>
               <Text style={styles.balanceLabel}>Total Balance</Text>
-              <Text style={styles.balanceAmount}>$1,250.00</Text>
+              <Text style={styles.balanceAmount}>${balance.toFixed(2)}</Text>
             </View>
           </View>
           

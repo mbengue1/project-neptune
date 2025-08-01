@@ -8,6 +8,8 @@ import PlayerBets from '../../components/PlayerBets/PlayerBets';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../themes/colors';
 import { useBetSelection } from '../../features/betting/BetSelectionContext/BetSelectionContext';
+import { useUserBalance, PlacedBet } from '../../features/betting/UserBalanceContext/UserBalanceContext';
+import { useBottomSheet } from '../../features/betting/BottomSheetContext/BottomSheetContext';
 import { getLeaguesBySport, getPlayerPropThresholds, getPropDisplayName, getLeagueNameById } from '../../data/sportsData/leagues';
 import { getMatchesBySport } from '../../data/sportsData';
 import { 
@@ -17,6 +19,9 @@ import {
   tennisMatches,
   PlayerBet
 } from '../../data/sportsBettingTypes';
+import PlacedBetCard from '../../components/PlacedBetCard/PlacedBetCard';
+import PendingBetCard from '../../components/PendingBetCard/PendingBetCard';
+import BetSlipGroup from '../../components/BetSlipGroup/BetSlipGroup';
 
 // Tab types
 const betStatusTabs = [
@@ -108,11 +113,23 @@ const BetsScreen = ({ route, navigation }: any) => {
   const [selectedLeague, setSelectedLeague] = useState('all');
   const [selectedFilter, setSelectedFilter] = useState('popular');
   const [selectedTab, setSelectedTab] = useState('view');
+
   const [leagues, setLeagues] = useState<any[]>([]);
   const [filters, setFilters] = useState(filtersBySport[sportType as keyof typeof filtersBySport] || filtersBySport.Soccer);
   const [playerBets, setPlayerBets] = useState<PlayerBet[]>([]);
   const [showPlayerBets, setShowPlayerBets] = useState(false);
-  const { getBetCount } = useBetSelection();
+  const { getBetCount, selectedBets, removeBet, clearBets } = useBetSelection();
+  const { placedBets, betSlips, placeBet, placeBetSlip, updateBetStatus } = useUserBalance();
+  const { hideBottomSheet, showBottomSheet } = useBottomSheet();
+
+  // Hide bottom sheet when on Open section, show on other sections
+  useEffect(() => {
+    if (selectedTab === 'open') {
+      hideBottomSheet();
+    } else {
+      showBottomSheet();
+    }
+  }, [selectedTab, hideBottomSheet, showBottomSheet]);
 
   // Update leagues when sport changes
   useEffect(() => {
@@ -495,6 +512,116 @@ const BetsScreen = ({ route, navigation }: any) => {
     );
   };
 
+  const renderOpenSection = () => {
+    if (selectedBets.length === 0) {
+      return (
+        <View style={styles.emptyStateContainer}>
+          <Ionicons name="football" size={100} color={Colors.textSecondary} style={{ opacity: 0.5 }} />
+          <Text style={styles.emptyStateTitle}>No pending bets</Text>
+          <Text style={styles.emptyStateSubtitle}>Select bets from matches to see them here</Text>
+        </View>
+      );
+    }
+
+    const handlePlaceBetSlip = async () => {
+      // This would integrate with a wager input modal
+      // For now, using a default wager amount
+      const defaultWager = 50.00;
+      const success = await placeBetSlip(selectedBets, defaultWager);
+      if (success) {
+        clearBets();
+      }
+    };
+
+    return (
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.betListSectionHeader}>
+          <Text style={styles.betListSectionTitle}>Pending Bet Slip ({selectedBets.length} bets)</Text>
+        </View>
+        <BetSlipGroup
+          bets={selectedBets}
+          onRemoveBet={removeBet}
+          onPlaceSlip={handlePlaceBetSlip}
+        />
+      </ScrollView>
+    );
+  };
+
+  const renderSettledSection = () => {
+    const activeSlips = betSlips.filter(slip => 
+      slip.status === 'active' || slip.status === 'pending'
+    );
+    const settledSlips = betSlips.filter(slip => 
+      slip.status === 'won' || slip.status === 'lost'
+    );
+
+    if (activeSlips.length === 0 && settledSlips.length === 0) {
+      return (
+        <View style={styles.emptyStateContainer}>
+          <Ionicons name="football" size={100} color={Colors.textSecondary} style={{ opacity: 0.5 }} />
+          <Text style={styles.emptyStateTitle}>No settled bets</Text>
+          <Text style={styles.emptyStateSubtitle}>Place some bets to see them here</Text>
+        </View>
+      );
+    }
+
+    return (
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {activeSlips.length > 0 && (
+          <>
+            <View style={styles.betListSectionHeader}>
+              <Text style={styles.betListSectionTitle}>Active Bet Slips ({activeSlips.length})</Text>
+            </View>
+            {activeSlips.map((slip) => (
+              <BetSlipGroup
+                key={slip.id}
+                bets={slip.bets}
+                onRemoveBet={() => {}} // No remove action for placed slips
+                isPlaced={true}
+                slipId={slip.id}
+                wager={slip.totalWager}
+                potentialWin={slip.totalPotentialWin}
+                status={slip.status}
+                createdAt={slip.createdAt}
+              />
+            ))}
+          </>
+        )}
+        
+        {settledSlips.length > 0 && (
+          <>
+            <View style={styles.betListSectionHeader}>
+              <Text style={styles.betListSectionTitle}>Settled Bet Slips ({settledSlips.length})</Text>
+            </View>
+            {settledSlips.map((slip) => (
+              <BetSlipGroup
+                key={slip.id}
+                bets={slip.bets}
+                onRemoveBet={() => {}} // No remove action for placed slips
+                isPlaced={true}
+                slipId={slip.id}
+                wager={slip.totalWager}
+                potentialWin={slip.totalPotentialWin}
+                status={slip.status}
+                createdAt={slip.createdAt}
+              />
+            ))}
+          </>
+        )}
+      </ScrollView>
+    );
+  };
+
+  const renderSavedSection = () => {
+    return (
+      <View style={styles.emptyStateContainer}>
+        <Ionicons name="bookmark-outline" size={100} color={Colors.textSecondary} style={{ opacity: 0.5 }} />
+        <Text style={styles.emptyStateTitle}>No saved bets</Text>
+        <Text style={styles.emptyStateSubtitle}>Save bets for later consideration</Text>
+      </View>
+    );
+  };
+
   const renderMainContent = () => {
     if (selectedTab === 'view') {
       const betCount = getBetCount();
@@ -519,26 +646,17 @@ const BetsScreen = ({ route, navigation }: any) => {
         );
       }
     } else if (selectedTab === 'open') {
-      return (
-        <View style={styles.emptyStateContainer}>
-          <Ionicons name="football" size={100} color={Colors.textSecondary} style={{ opacity: 0.5 }} />
-          <Text style={styles.emptyStateTitle}>No active bets</Text>
-          <Text style={styles.emptyStateSubtitle}>You must be logged in to see bets</Text>
-          <TouchableOpacity style={styles.loginButton}>
-            <Text style={styles.loginButtonText}>Log in or join now</Text>
-          </TouchableOpacity>
-        </View>
-      );
+      return renderOpenSection();
+    } else if (selectedTab === 'settled') {
+      return renderSettledSection();
+    } else if (selectedTab === 'saved') {
+      return renderSavedSection();
     } else {
-      // Settled and Saved tabs
       return (
         <View style={styles.emptyStateContainer}>
           <Ionicons name="football" size={100} color={Colors.textSecondary} style={{ opacity: 0.5 }} />
-          <Text style={styles.emptyStateTitle}>No {selectedTab} bets</Text>
-          <Text style={styles.emptyStateSubtitle}>You must be logged in to see bets</Text>
-          <TouchableOpacity style={styles.loginButton}>
-            <Text style={styles.loginButtonText}>Log in or join now</Text>
-          </TouchableOpacity>
+          <Text style={styles.emptyStateTitle}>No bets found</Text>
+          <Text style={styles.emptyStateSubtitle}>Select a different tab to view bets</Text>
         </View>
       );
     }

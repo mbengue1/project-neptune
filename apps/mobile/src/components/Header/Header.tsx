@@ -4,6 +4,7 @@ import { styles } from './Header.styles';
 import { Colors } from '../../themes/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useUserBalance } from '../../features/betting/UserBalanceContext/UserBalanceContext';
 
 // Props interface for the Header component
 interface HeaderProps {
@@ -13,10 +14,14 @@ interface HeaderProps {
 
 // Header component for the main screen
 const Header: React.FC<HeaderProps> = ({ 
-  balance = 30.23, 
+  balance: propBalance, 
   onDepositPress 
 }) => {
   const navigation = useNavigation();
+  const { balance } = useUserBalance();
+  
+  // Use prop balance if provided, otherwise use context balance
+  const displayBalance = propBalance ?? balance;
 
   const handleDepositPress = () => {
     if (onDepositPress) {
@@ -32,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({
       <Text style={styles.title}>Neptune</Text>
       <View style={styles.balanceContainer}>
         <Ionicons name="cash-outline" size={18} color={Colors.success} style={styles.dollarIcon} />
-        <Text style={styles.balance}>${balance.toFixed(2)}</Text>
+        <Text style={styles.balance}>${displayBalance.toFixed(2)}</Text>
         <TouchableOpacity 
           style={styles.depositButton}
           onPress={handleDepositPress}

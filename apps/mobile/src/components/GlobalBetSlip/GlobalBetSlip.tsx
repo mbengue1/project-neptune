@@ -13,6 +13,8 @@ import { styles } from './GlobalBetSlip.styles';
 import { Colors } from '../../themes/colors';
 import { poppins } from '../../utils/fonts';
 import { useBetSelection, SelectedBet } from '../../features/betting/BetSelectionContext/BetSelectionContext';
+import { useBottomSheet } from '../../features/betting/BottomSheetContext/BottomSheetContext';
+import BetPlacementModal from '../BetPlacementModal/BetPlacementModal';
 
 const { height: screenHeight } = Dimensions.get('window');
 const NAVBAR_HEIGHT = 60; // Actual content height (without padding)
@@ -21,21 +23,23 @@ const SAFE_AREA_BOTTOM = Platform.OS === 'ios' ? 34 : 0; // Home indicator heigh
 
 const GlobalBetSlip: React.FC = () => {
   const { selectedBets, removeBet, clearBets, getBetCount } = useBetSelection();
+  const { isBottomSheetVisible } = useBottomSheet();
   const [isExpanded, setIsExpanded] = useState(false);
   const [slideAnim] = useState(new Animated.Value(0));
   const [isVisible, setIsVisible] = useState(false);
+  const [showBetPlacement, setShowBetPlacement] = useState(false);
 
   const betCount = getBetCount();
 
-  // Auto-show/hide based on bet count
+  // Auto-show/hide based on bet count and bottom sheet visibility
   useEffect(() => {
-    if (betCount > 0 && !isVisible) {
+    if (betCount > 0 && !isVisible && isBottomSheetVisible) {
       setIsVisible(true);
-    } else if (betCount === 0 && isVisible) {
+    } else if ((betCount === 0 && isVisible) || !isBottomSheetVisible) {
       setIsVisible(false);
       setIsExpanded(false);
     }
-  }, [betCount, isVisible]);
+  }, [betCount, isVisible, isBottomSheetVisible]);
 
   // Always keep collapsed initially when bets are added
   useEffect(() => {
@@ -137,7 +141,10 @@ const GlobalBetSlip: React.FC = () => {
           >
             <Text style={styles.clearButtonText}>Clear All</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.continueButton}>
+          <TouchableOpacity 
+            style={styles.continueButton}
+            onPress={() => setShowBetPlacement(true)}
+          >
             <Text style={styles.continueButtonText}>Continue</Text>
           </TouchableOpacity>
         </View>
@@ -150,15 +157,26 @@ const GlobalBetSlip: React.FC = () => {
   }
 
   return (
-    <Animated.View style={[
-      styles.container,
-      { 
-        height: sheetHeight,
-        bottom: NAVBAR_HEIGHT + NAVBAR_PADDING + SAFE_AREA_BOTTOM
-      }
-    ]}>
-      {isExpanded ? renderExpandedView() : renderCollapsedView()}
-    </Animated.View>
+    <>
+      <Animated.View style={[
+        styles.container,
+        { 
+          height: sheetHeight,
+          bottom: NAVBAR_HEIGHT + NAVBAR_PADDING + SAFE_AREA_BOTTOM
+        }
+      ]}>
+        {isExpanded ? renderExpandedView() : renderCollapsedView()}
+      </Animated.View>
+      
+      <BetPlacementModal
+        isVisible={showBetPlacement}
+        onClose={() => setShowBetPlacement(false)}
+        onSuccess={() => {
+          setShowBetPlacement(false);
+          setIsExpanded(false);
+        }}
+      />
+    </>
   );
 };
 
