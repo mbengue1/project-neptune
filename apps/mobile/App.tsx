@@ -4,6 +4,7 @@ import { AuthProvider } from './src/features/auth/AuthContext/AuthContext';
 import { BetSelectionProvider } from './src/features/betting/BetSelectionContext/BetSelectionContext';
 import { UserBalanceProvider } from './src/features/betting/UserBalanceContext/UserBalanceContext';
 import { BottomSheetProvider } from './src/features/betting/BottomSheetContext/BottomSheetContext';
+import { SportsDataProvider } from './src/contexts/SportsDataContext';
 import GlobalBetSlip from './src/components/GlobalBetSlip/GlobalBetSlip';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { Colors } from './src/themes/colors';
@@ -24,15 +25,17 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <BetSelectionProvider>
-        <UserBalanceProvider>
-          <BottomSheetProvider>
-            <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
-            <AppNavigator />
-            <GlobalBetSlip />
-          </BottomSheetProvider>
-        </UserBalanceProvider>
-      </BetSelectionProvider>
+      <SportsDataProvider>
+        <BetSelectionProvider>
+          <UserBalanceProvider>
+            <BottomSheetProvider>
+              <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+              <AppNavigator />
+              <GlobalBetSlip />
+            </BottomSheetProvider>
+          </UserBalanceProvider>
+        </BetSelectionProvider>
+      </SportsDataProvider>
     </AuthProvider>
   );
 }

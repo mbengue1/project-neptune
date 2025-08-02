@@ -492,19 +492,81 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       if (!user) throw new Error('No user logged in');
       
+      // Check network connectivity
+      if (!isOnline) {
+        throw new Error('No internet connection. Please check your network and try again.');
+      }
+      
       const endpoint = `${API_URL}/users/${user.uid}`;
       console.log('Making request to:', endpoint);
       
-      // First verify the user exists
+      // First try to get user data from MongoDB
+      let userExists = false;
       try {
         const checkUser = await axios.get(`${API_URL}/users/${user.uid}`);
-        console.log('User exists:', checkUser.data);
+        console.log('User exists in MongoDB:', checkUser.data);
+        userExists = true;
       } catch (err) {
-        console.error('User check failed:', err);
-        throw new Error('User not found in database');
+        console.log('User not found in MongoDB, will create if needed');
+        userExists = false;
       }
 
-      // Then update the username
+      // If user doesn't exist in MongoDB, try to get data from Firebase and create in MongoDB
+      if (!userExists) {
+        try {
+          console.log('Attempting to sync user data from Firebase to MongoDB...');
+          const userDocRef = doc(firestore, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists()) {
+            const firebaseUserData = userDoc.data() as UserData;
+            console.log('Found user data in Firebase, syncing to MongoDB...');
+            
+            // Create user in MongoDB with Firebase data
+            await axios.post(`${API_URL}/users`, {
+              firebaseUid: user.uid,
+              ...firebaseUserData
+            });
+            console.log('User synced to MongoDB successfully');
+            userExists = true;
+          } else {
+            throw new Error('User not found in either Firebase or MongoDB');
+          }
+        } catch (syncErr) {
+          console.error('Failed to sync user data:', syncErr);
+          
+          // If Firebase is offline or user doesn't exist in Firestore, create a basic user in MongoDB
+          const errorMessage = syncErr instanceof Error ? syncErr.message : String(syncErr);
+          if (errorMessage.includes('offline') || errorMessage.includes('Failed to get document')) {
+            console.log('Firebase is offline or user not in Firestore, creating basic user in MongoDB...');
+            
+            // Create a basic user record with available information
+            const basicUserData = {
+              firebaseUid: user.uid,
+              email: user.email || 'unknown@example.com',
+              username: user.displayName || `user_${user.uid.substring(0, 8)}`,
+              fullName: user.displayName || 'Unknown User',
+              phoneNumber: user.phoneNumber || 'N/A',
+              country: 'United States',
+              dateOfBirth: '01/01/1990',
+              joinDate: new Date().toISOString()
+            };
+            
+            try {
+              await axios.post(`${API_URL}/users`, basicUserData);
+              console.log('Basic user created in MongoDB successfully');
+              userExists = true;
+            } catch (createErr) {
+              console.error('Failed to create basic user in MongoDB:', createErr);
+              throw new Error('Unable to create user in database');
+            }
+          } else {
+            throw new Error('User not found in database and unable to sync from Firebase');
+          }
+        }
+      }
+
+      // Now update the username
       const response = await axios.put(`${API_URL}/users/${user.uid}`, {
         username: newUsername
       }, {
@@ -589,38 +651,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const updateMongoDBEmail = async () => {
           try {
             // Check if the email in MongoDB is different from Firebase
-            const userResponse = await axios.get(`${API_URL}/users/${user.uid}`);
-            const mongoEmail = userResponse.data.email;
-            
-            if (mongoEmail !== user.email) {
-              // Email has changed and been verified - update MongoDB
-              await axios.put(`${API_URL}/users/${user.uid}`, {
-                email: user.email
-              });
+            try {
+              const userResponse = await axios.get(`${API_URL}/users/${user.uid}`);
+              const mongoEmail = userResponse.data.email;
               
-              // Update local state
-              setUserData(prev => prev ? { ...prev, email: user.email! } : null);
-              
-              console.log('Email updated in MongoDB after verification');
-              
-              // Show alert about the email change
-              // Alert.alert(
-              //   "Email Updated",
-              //   "Your email has been successfully verified and updated. You'll need to log in again with your new email.",
-              //   [
-              //     { 
-              //       text: "Log out now", 
-              //       onPress: () => {
-              //         logout();
-              //       }
-              //     },
-              //     {
-              //       text: "Later",
-              //       style: "cancel"
-              //     }
-              //   ]
-              // );
+              if (mongoEmail !== user.email) {
+                // Email has changed and been verified - update MongoDB
+                await axios.put(`${API_URL}/users/${user.uid}`, {
+                  email: user.email
+                });
+                
+                // Update local state
+                setUserData(prev => prev ? { ...prev, email: user.email! } : null);
+                
+                console.log('Email updated in MongoDB after verification');
+              }
+            } catch (err) {
+              console.log('User not found in MongoDB during email verification check, skipping MongoDB update');
             }
+            
+            // Show alert about the email change
+            // Alert.alert(
+            //   "Email Updated",
+            //   "Your email has been successfully verified and updated. You'll need to log in again with your new email.",
+            //   [
+            //     { 
+            //       text: "Log out now", 
+            //       onPress: () => {
+            //         logout();
+            //       }
+            //     },
+            //     {
+            //       text: "Later",
+            //       style: "cancel"
+            //     }
+            //   ]
+            // );
           } catch (err) {
             console.error('Failed to update email in MongoDB after verification:', err);
           }

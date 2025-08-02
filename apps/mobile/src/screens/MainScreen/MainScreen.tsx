@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, SafeAreaView, StatusBar, ScrollView, Text } from 'react-native';
+import { View, SafeAreaView, StatusBar, ScrollView, Text, ActivityIndicator } from 'react-native';
 import { styles } from './MainScreen.styles';
 import Header from '../../components/Header/Header';
 import CategoryTabs from '../../components/CategoryTabs/CategoryTabs';
@@ -8,12 +8,15 @@ import MatchList from '../../components/MatchList/MatchList';
 import BottomNavBar from '../../components/BottomNavBar/BottomNavBar';
 import { Colors } from '../../themes/colors';
 import EmailVerificationBanner from '../../components/EmailVertification/EmailVerificationBanner';
-import { getAllMatches } from '../../data/sportsData';
+import { useAllSportsData } from '../../hooks/useOddsApi';
 
 // main screen of the app showing featured matches and recommendations
 const MainScreen = ({ navigation }: any) => {
   const [selectedSport, setSelectedSport] = useState('All');
   const [showLiveOnly, setShowLiveOnly] = useState(false);
+  
+  // Use the API hook to get all sports data
+  const { allMatches, isLoading, error, refreshData } = useAllSportsData();
 
   const handleCategoryChange = (category: string) => {
     // Handle special cases
@@ -27,6 +30,26 @@ const MainScreen = ({ navigation }: any) => {
   };
 
   const renderMatchLists = () => {
+    // Show loading state
+    if (isLoading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading live odds...</Text>
+        </View>
+      );
+    }
+
+    // Show error state
+    if (error) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <Text style={styles.errorSubtext}>Using offline data</Text>
+        </View>
+      );
+    }
+
     // For Live selection, we would filter matches that are live
     if (showLiveOnly) {
       return (

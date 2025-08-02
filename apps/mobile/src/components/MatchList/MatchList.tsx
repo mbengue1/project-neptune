@@ -5,14 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../themes/colors';
 import { useNavigation } from '@react-navigation/native';
 import { useBetSelection } from '../../features/betting/BetSelectionContext/BetSelectionContext';
-import { 
-  getMatchesBySport, 
-  basketballMatches,
-  footballMatches,
-  hockeyMatches,
-  tennisMatches,
-  soccerMatches
-} from '../../data/sportsData';
+import { useSportsData } from '../../contexts/SportsDataContext';
 import { getLeagueNameById } from '../../data/sportsData/leagues';
 import type { MatchType } from '../../types/matches';
 
@@ -48,30 +41,11 @@ const MatchList = ({
   const navigation = useNavigation<any>();
   const [matches, setMatches] = useState<ExtendedMatch[]>([]);
   const { addBet, removeBetByMatchAndOdds, isBetSelected } = useBetSelection();
+  const { getMatchesBySport } = useSportsData();
   
   useEffect(() => {
-    // Get sport-specific matches
-    let sportMatches: ExtendedMatch[] = [];
-    
-    switch(sportType) {
-      case 'Basketball':
-        sportMatches = basketballMatches;
-        break;
-      case 'Football':
-        sportMatches = footballMatches;
-        break;
-      case 'Hockey':
-        sportMatches = hockeyMatches;
-        break;
-      case 'Tennis':
-        sportMatches = tennisMatches as ExtendedMatch[];
-        break;
-      case 'Soccer':
-        sportMatches = soccerMatches;
-        break;
-      default:
-        sportMatches = getMatchesBySport(sportType);
-    }
+    // Get sport-specific matches from API context
+    let sportMatches: ExtendedMatch[] = getMatchesBySport(sportType);
     
     // Apply league filter
     if (leagueFilter !== 'all') {

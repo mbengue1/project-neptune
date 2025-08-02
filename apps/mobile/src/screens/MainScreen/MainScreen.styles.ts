@@ -31,4 +31,36 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 6,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: poppins.medium,
+    color: Colors.textSecondary,
+    marginTop: 12,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    fontFamily: poppins.medium,
+    color: Colors.error,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  errorSubtext: {
+    fontSize: 14,
+    fontFamily: poppins.regular,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
 });
