@@ -36,13 +36,16 @@ const BottomNavBar = ({ navigation }: any) => {
       setActiveTab('Home');
     } else if (routeName === 'Bets') {
       setActiveTab('My Bets');
+    } else if (routeName === 'AIPage') {
+      setActiveTab('AI');
+    } else if (routeName === 'Statistics') {
+      setActiveTab('Stats');
     } else if (
       routeName === 'Profile' || 
       routeName === 'ProfileDetails' || 
       routeName === 'HelpSupport' || 
       routeName === 'Accessibility' ||
-      routeName === 'PaymentMethods' ||
-      routeName === 'Statistics'
+      routeName === 'PaymentMethods'
     ) {
       setActiveTab('Account');
     } else if (routeName === 'Temporary' && params?.screen) {
@@ -55,10 +58,14 @@ const BottomNavBar = ({ navigation }: any) => {
     // Navigate to the corresponding screen
     if (tabName === 'Home') {
       navigation.navigate('Main');
-    } else if (tabName === 'Account') {
-      navigation.navigate('Profile');
+    } else if (tabName === 'AI') {
+      navigation.navigate('AIPage');
     } else if (tabName === 'My Bets') {
       navigation.navigate('Bets', { sportType: 'All' });
+    } else if (tabName === 'Stats') {
+      navigation.navigate('Statistics');
+    } else if (tabName === 'Account') {
+      navigation.navigate('Profile');
     } else {
       // For other tabs, navigate to a temporary screen with the tab name as a parameter
       navigation.navigate('Temporary', { screen: tabName });

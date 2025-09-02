@@ -5,18 +5,12 @@ import { ODDS_API_KEY, ODDS_API_BASE_URL } from '@env';
 const API_BASE_URL = ODDS_API_BASE_URL || 'https://api.the-odds-api.com/v4';
 const API_KEY = ODDS_API_KEY || '';
 
-// Debug logging
-console.log('🔧 Environment Check:');
-console.log('API_BASE_URL:', API_BASE_URL);
-console.log('API_KEY exists:', !!API_KEY);
-console.log('API_KEY length:', API_KEY?.length || 0);
-console.log('ODDS_API_KEY from env:', ODDS_API_KEY);
-console.log('ODDS_API_BASE_URL from env:', ODDS_API_BASE_URL);
-console.log('🔧 Full API_KEY (first 10 chars):', API_KEY ? API_KEY.substring(0, 10) + '...' : 'undefined');
-console.log('🔧 Environment variables loaded:', {
-  ODDS_API_KEY: typeof ODDS_API_KEY,
-  ODDS_API_BASE_URL: typeof ODDS_API_BASE_URL
-});
+// Debug logging (can be removed in production)
+if (__DEV__) {
+  console.log('🔧 Environment Check:');
+  console.log('API_KEY exists:', !!API_KEY);
+  console.log('API_KEY length:', API_KEY?.length || 0);
+}
 
 // API Response Types
 interface Sport {

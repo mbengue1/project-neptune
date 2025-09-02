@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, SafeAreaView, StatusBar, ScrollView, Text, ActivityIndicator } from 'react-native';
+import { View, SafeAreaView, StatusBar, FlatList, Text, ActivityIndicator } from 'react-native';
 import { styles } from './MainScreen.styles';
 import Header from '../../components/Header/Header';
 import CategoryTabs from '../../components/CategoryTabs/CategoryTabs';
@@ -67,21 +67,40 @@ const MainScreen = ({ navigation }: any) => {
 
     // For 'All', show 3 matches from each sport
     const sportTypes = ['Soccer', 'Basketball', 'Football', 'Hockey', 'Tennis'];
-    return (
-      <>
-        {sportTypes.map((sport) => (
-          <View key={sport} style={styles.sportSection}>
-            <Text style={styles.sportTitle}>{sport}</Text>
-            <MatchList 
-              sportType={sport} 
-              showMoreLink={true} 
-              maxMatches={3} 
-              showTitle={false} 
-            />
-          </View>
-        ))}
-      </>
-    );
+    return sportTypes.map((sport) => (
+      <View key={sport} style={styles.sportSection}>
+        <Text style={styles.sportTitle}>{sport}</Text>
+        <MatchList 
+          sportType={sport} 
+          showMoreLink={true} 
+          maxMatches={3} 
+          showTitle={false} 
+        />
+      </View>
+    ));
+  };
+
+  const renderFlatListContent = () => {
+    const content = [];
+    
+    // Add featured match if not showing live only
+    if (!showLiveOnly) {
+      content.push(
+        <View key="featured">
+          <FeaturedMatch />
+        </View>
+      );
+    }
+    
+    // Add match lists
+    const matchLists = renderMatchLists();
+    if (Array.isArray(matchLists)) {
+      content.push(...matchLists);
+    } else {
+      content.push(matchLists);
+    }
+    
+    return content;
   };
 
   return (
@@ -90,10 +109,13 @@ const MainScreen = ({ navigation }: any) => {
       <EmailVerificationBanner />
       <Header />
       <CategoryTabs onCategoryChange={handleCategoryChange} />
-      <ScrollView style={styles.scrollView}>
-        {!showLiveOnly && <FeaturedMatch />}
-        {renderMatchLists()}
-      </ScrollView>
+      <FlatList
+        style={styles.scrollView}
+        data={renderFlatListContent()}
+        renderItem={({ item }) => item}
+        keyExtractor={(item, index) => `content-${index}`}
+        showsVerticalScrollIndicator={false}
+      />
       <BottomNavBar navigation={navigation} />
     </SafeAreaView>
   );

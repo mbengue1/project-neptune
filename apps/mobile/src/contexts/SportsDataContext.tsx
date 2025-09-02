@@ -15,14 +15,18 @@ const SportsDataContext = createContext<SportsDataContextType | undefined>(undef
 export const SportsDataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { allMatches, isLoading, error, refreshData } = useAllSportsData();
 
-  console.log('🏈 SportsDataContext - allMatches keys:', Object.keys(allMatches));
-  console.log('🏈 SportsDataContext - isLoading:', isLoading);
-  console.log('🏈 SportsDataContext - error:', error);
+  if (__DEV__) {
+    console.log('🏈 SportsDataContext - allMatches keys:', Object.keys(allMatches));
+    console.log('🏈 SportsDataContext - isLoading:', isLoading);
+    console.log('🏈 SportsDataContext - error:', error);
+  }
 
   const getMatchesBySport = (sportType: string): MatchType[] => {
     const sportKey = sportType.toLowerCase();
-    const matches = allMatches[sportKey] || [];
-    console.log(`🏈 Getting matches for ${sportType}:`, matches.length);
+    const matches = allMatches && allMatches[sportKey] ? allMatches[sportKey] : [];
+    if (__DEV__) {
+      console.log(`🏈 Getting matches for ${sportType}:`, matches.length);
+    }
     return matches;
   };
 

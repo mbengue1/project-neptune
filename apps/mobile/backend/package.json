@@ -16,6 +16,12 @@
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.13.2"
+    "mongoose": "^8.13.2",
+    "openai": "^4.28.0",
+    "redis": "^4.6.12",
+    "axios": "^1.6.7",
+    "node-cron": "^3.0.3",
+    "ws": "^8.16.0",
+    "express-rate-limit": "^7.1.5"
   }
 }

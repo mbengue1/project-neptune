@@ -15,7 +15,7 @@ const SPORT_KEYS = {
   basketball: ['basketball_nba', 'basketball_ncaab'],
   football: ['americanfootball_nfl', 'americanfootball_ncaaf'],
   hockey: ['icehockey_nhl'],
-  tennis: ['tennis_atp_singles', 'tennis_wta_singles', 'tennis_atp_doubles', 'tennis_wta_doubles']
+  tennis: [] // Tennis API endpoints are not available, will use mock data
 };
 
 // Mock data fallback

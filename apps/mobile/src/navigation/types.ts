@@ -13,4 +13,5 @@ export type RootStackParamList = {
   Temporary: undefined;
   Bets: { sportType?: string };
   MatchDetails: { match: any };
+  AIPage: undefined;
 }; 

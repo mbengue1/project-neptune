@@ -42,10 +42,18 @@ mongoose.connection.on('error', (err) => {
   console.error('MongoDB connection error:', err);
 });
 
+// Initialize cache service
+const { initializeRedis } = require('./services/cacheService');
+initializeRedis().catch(err => {
+  console.error('Failed to initialize Redis cache:', err);
+  console.log('Continuing without cache...');
+});
+
 // Define routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/status', require('./routes/status'));
+app.use('/api/ai', require('./routes/ai'));
 
 // Basic route for testing
 app.get('/', (req, res) => {
