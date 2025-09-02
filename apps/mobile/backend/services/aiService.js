@@ -161,27 +161,49 @@ const AVAILABLE_TOOLS = [
 // Tool execution functions
 const executeTool = async (toolName, args) => {
   try {
+    console.log(`🔧 [AI-SERVICE] Executing tool: ${toolName} with args:`, args);
+    
+    let result;
     switch (toolName) {
       case 'getPlayerStats':
-        return await getPlayerStats(args.playerName, args.league, args.window || 10);
+        result = await getPlayerStats(args.playerName, args.league, args.window || 10);
+        break;
       
       case 'getGameOdds':
-        return await getGameOdds(args.gameId, args.book);
+        result = await getGameOdds(args.gameId, args.book);
+        break;
       
       case 'getInjuryReport':
-        return await getInjuryReport(args.playerName, args.league);
+        result = await getInjuryReport(args.playerName, args.league);
+        break;
       
       case 'getTeamStats':
-        return await getTeamStats(args.teamName, args.league);
+        result = await getTeamStats(args.teamName, args.league);
+        break;
       
       case 'getTrendingPlayers':
-        return await getTrendingPlayers(args.league, args.metric, args.window || 10);
+        result = await getTrendingPlayers(args.league, args.metric, args.window || 10);
+        break;
       
       default:
         throw new Error(`Unknown tool: ${toolName}`);
     }
+    
+    // Log the data source
+    if (result && result.source) {
+      if (result.source === 'API-SPORTS.io') {
+        console.log(`✅ [AI-SERVICE] Tool ${toolName} returned REAL API data from ${result.source}`);
+      } else if (result.source.includes('Mock')) {
+        console.log(`🎭 [AI-SERVICE] Tool ${toolName} returned MOCK data: ${result.source}`);
+      } else {
+        console.log(`📊 [AI-SERVICE] Tool ${toolName} returned data from: ${result.source}`);
+      }
+    }
+    
+    return result;
+    
   } catch (error) {
-    console.error(`Tool execution error for ${toolName}:`, error);
+    console.error(`❌ [AI-SERVICE] Tool execution error for ${toolName}:`, error);
     return {
       error: `Failed to execute ${toolName}`,
       details: error.message

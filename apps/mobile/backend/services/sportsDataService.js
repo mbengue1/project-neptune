@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { getCachedData, setCachedData } = require('./cacheService');
+const sportIntelService = require('./sportIntelService');
 
 // Base configurations for different sports APIs
 const API_CONFIGS = {
@@ -75,53 +76,109 @@ const MOCK_DATA = {
 // Get player statistics
 const getPlayerStats = async (playerName, league, window = 10) => {
   try {
-    const cacheKey = `player_stats_${playerName}_${league}_${window}`;
+    console.log(`🏀 [SPORTS-DATA] Fetching player stats for ${playerName} in ${league} (last ${window} games)`);
     
-    // Check cache first
-    const cachedData = await getCachedData(cacheKey);
-    if (cachedData) {
-      console.log(`Cache hit for player stats: ${playerName}`);
-      return cachedData;
+    // Use the new sport-intel service for real API data
+    const result = await sportIntelService.getPlayerRollingStats(playerName, league, '2024', window, 'points');
+    
+    if (!result.success) {
+      // Fallback to mock data if API fails
+      console.log(`⚠️  [SPORTS-DATA] API failed for ${playerName}, using mock data:`, result.error);
+      console.log(`📊 [SPORTS-DATA] FALLBACK: Using mock data for ${playerName}`);
+      return getMockPlayerStats(playerName, league, window);
     }
 
-    // For now, return mock data (will be replaced with real API calls)
-    console.log(`Fetching player stats for ${playerName} in ${league} (last ${window} games)`);
+    const { player, rollingStats, gameLogs } = result.data;
     
-    let playerData;
+    // Log successful API data retrieval
+    console.log(`✅ [SPORTS-DATA] SUCCESS: Retrieved real API data for ${player.name}`);
+    console.log(`📈 [SPORTS-DATA] Player: ${player.name} (ID: ${player.playerId})`);
+    console.log(`📊 [SPORTS-DATA] Stats: ${rollingStats.mean} points avg over ${rollingStats.games} games`);
+    console.log(`📅 [SPORTS-DATA] Date range: ${result.meta.dateRange?.start} to ${result.meta.dateRange?.end}`);
+    console.log(`🔄 [SPORTS-DATA] Trend: ${rollingStats.recentTrend}`);
+    console.log(`⏰ [SPORTS-DATA] Source: API-SPORTS.io, timestamp: ${result.meta.timestamp}`);
     
-    if (league === 'NBA' && MOCK_DATA.playerStats[playerName]) {
-      playerData = MOCK_DATA.playerStats[playerName];
-    } else {
-      // Generate mock data for other players
-      playerData = {
-        name: playerName,
-        team: 'Mock Team',
-        league: league,
-        stats: {
-          points: Math.floor(Math.random() * 30) + 10,
-          rebounds: Math.floor(Math.random() * 15) + 5,
-          assists: Math.floor(Math.random() * 10) + 3,
-          games: window
-        },
-        recentGames: Array.from({ length: window }, (_, i) => ({
-          points: Math.floor(Math.random() * 30) + 10,
-          rebounds: Math.floor(Math.random() * 15) + 5,
-          assists: Math.floor(Math.random() * 10) + 3,
-          date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-        })),
-        timestamp: new Date().toISOString()
-      };
-    }
+    // Format the response to match expected structure
+    const playerData = {
+      name: player.name,
+      team: player.team,
+      league: league,
+      playerId: player.playerId,
+      stats: {
+        points: rollingStats.mean,
+        rebounds: 0, // Will be calculated separately if needed
+        assists: 0,  // Will be calculated separately if needed
+        games: rollingStats.games,
+        trend: rollingStats.recentTrend,
+        min: rollingStats.min,
+        max: rollingStats.max,
+        stdDev: rollingStats.stdDev
+      },
+      recentGames: gameLogs.map(game => ({
+        points: game.points,
+        rebounds: game.rebounds,
+        assists: game.assists,
+        date: game.date,
+        opponent: game.opponent,
+        homeAway: game.homeAway
+      })),
+      timestamp: result.meta.timestamp,
+      source: 'API-SPORTS.io'
+    };
 
-    // Cache the result
-    await setCachedData(cacheKey, playerData, CACHE_TTL.playerStats);
-    
+    console.log(`🎯 [SPORTS-DATA] Returning real API data for ${playerName}`);
     return playerData;
 
   } catch (error) {
-    console.error('Error fetching player stats:', error);
-    throw new Error(`Failed to fetch player stats: ${error.message}`);
+    console.error('❌ [SPORTS-DATA] Error fetching player stats:', error);
+    console.log(`📊 [SPORTS-DATA] FALLBACK: Using mock data due to error for ${playerName}`);
+    // Fallback to mock data
+    return getMockPlayerStats(playerName, league, window);
   }
+};
+
+// Fallback mock data function
+const getMockPlayerStats = (playerName, league, window) => {
+  console.log(`🎭 [SPORTS-DATA] MOCK: Using mock data for ${playerName}`);
+  console.log(`⚠️  [SPORTS-DATA] WARNING: This is NOT real data - API unavailable or failed`);
+  
+  let playerData;
+  
+  if (league === 'NBA' && MOCK_DATA.playerStats[playerName]) {
+    console.log(`🎭 [SPORTS-DATA] Using predefined mock data for ${playerName}`);
+    playerData = MOCK_DATA.playerStats[playerName];
+  } else {
+    // Generate mock data for other players
+    console.log(`🎭 [SPORTS-DATA] Generating random mock data for ${playerName}`);
+    const mockPoints = Math.floor(Math.random() * 30) + 10;
+    const mockRebounds = Math.floor(Math.random() * 15) + 5;
+    const mockAssists = Math.floor(Math.random() * 10) + 3;
+    
+    playerData = {
+      name: playerName,
+      team: 'Mock Team',
+      league: league,
+      stats: {
+        points: mockPoints,
+        rebounds: mockRebounds,
+        assists: mockAssists,
+        games: window
+      },
+      recentGames: Array.from({ length: window }, (_, i) => ({
+        points: Math.floor(Math.random() * 30) + 10,
+        rebounds: Math.floor(Math.random() * 15) + 5,
+        assists: Math.floor(Math.random() * 10) + 3,
+        date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      })),
+      timestamp: new Date().toISOString(),
+      source: 'Mock Data (API unavailable)'
+    };
+    
+    console.log(`🎭 [SPORTS-DATA] Generated mock stats: ${mockPoints} pts, ${mockRebounds} reb, ${mockAssists} ast`);
+  }
+
+  console.log(`🎭 [SPORTS-DATA] MOCK: Returning mock data for ${playerName}`);
+  return playerData;
 };
 
 // Get game odds

@@ -54,6 +54,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/status', require('./routes/status'));
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/sport-intel', require('./routes/sportIntel'));
 
 // Basic route for testing
 app.get('/', (req, res) => {
