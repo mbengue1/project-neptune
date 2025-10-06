@@ -1,0 +1,13 @@
+{
+  "name": "@neptune/cache",
+  "version": "1.0.0",
+  "description": "Shared cache utilities for Neptune platform",
+  "main": "src/cacheService.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "redis": "^4.6.12"
+  },
+  "private": true
+}

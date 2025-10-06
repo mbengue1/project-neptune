@@ -1,0 +1,24 @@
+# Multi-stage Dockerfile for Neptune Ingestion worker
+
+FROM node:20-alpine AS base
+WORKDIR /app
+RUN apk add --no-cache libc6-compat
+
+FROM base AS deps
+COPY services/ingestion/package*.json ./
+RUN npm ci --only=production
+
+FROM base AS runner
+ENV NODE_ENV production
+WORKDIR /app
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 neptune
+
+COPY --from=deps --chown=neptune:nodejs /app/node_modules ./node_modules
+COPY --chown=neptune:nodejs services/ingestion/src ./src
+COPY --chown=neptune:nodejs packages/cache ../packages/cache
+
+USER neptune
+
+CMD ["node", "src/index.js"]

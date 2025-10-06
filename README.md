@@ -1,337 +1,401 @@
-# Neptune Sportsbook - AI-Enhanced Sports Betting Platform
+# Neptune — Social Intelligence-Forward Sportsbook
 
-A modern, AI-powered sports betting application built with React Native and real-time odds integration. Our platform combines live sports data with intelligent insights to help users make informed betting decisions.
+> A modern, AI-powered sports betting platform combining live odds, seamless betting, event chat, public bet sharing with leaderboards, and in-app AI assistance.
 
-> **Current Status:** MVP with real-time odds integration and mock betting flow
-> **Next Phase:** AI chat assistant and Machine Learning Model Integration with advanced analytics
-
----
-
-## Table of Contents
-1. [Project Overview](#project-overview)
-2. [Tech Stack](#tech-stack)
-3. [Current Features](#current-features)
-4. [Project Structure](#project-structure)
-5. [Setup Instructions](#setup-instructions)
-6. [Development Guidelines](#development-guidelines)
-7. [API Integration](#api-integration)
-8. [Roadmap](#roadmap)
-9. [Contributing](#contributing)
+[![License: UNLICENSED](https://img.shields.io/badge/license-UNLICENSED-red.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/typescript-%5E5.4.5-blue.svg)](https://www.typescriptlang.org/)
 
 ---
 
-## Project Overview
+## 🎯 Vision
 
-Neptune Sportsbook is designed to be the next generation of sports betting platforms, combining:
+Neptune is designed to be the next generation of sports betting platforms:
 
-- **Real-time odds** from professional sports APIs
-- **AI-powered insights** and statistical analysis
-- **Intelligent chat assistant** for sports data queries
-- **Responsive mobile experience** with React Native
-- **Machine Learning Model** for comm
-- **Secure user management** with Firebase authentication Inprogres
-
-Our goal is to provide users with comprehensive sports data, intelligent recommendations, and a seamless betting experience that goes beyond traditional sportsbooks.
+- **💰 Money safety first**: Double-entry ledger, idempotent operations, atomic settlements
+- **⚡ Fast & scalable**: Redis-backed reads, event-driven architecture, horizontal scaling
+- **🔒 Privacy-first social**: Public profiles opt-in, stake redaction, configurable delays
+- **📊 Built-in observability**: OTel tracing, metrics, structured logs, SLOs
+- **🏗️ Evolve gracefully**: Modular monolith → microservices when needed
 
 ---
 
-## Tech Stack
+## 📁 Repository Structure
 
-### Frontend
-- **React Native** - Cross-platform mobile development
-- **TypeScript** - Type safety and better developer experience
-- **Expo** - Development tools and deployment platform
-- **React Navigation** - Screen navigation and routing
-
-### Backend & APIs
-- **Node.js/Express** - REST API server
-- **MongoDB** - User data and session management
-- **Firebase** - Authentication and real-time features
-- **The Odds API** - Live sports odds and data
-
-### State Management
-- **React Context** - Global state management
-- **Custom Hooks** - Reusable data fetching logic
-- **AsyncStorage** - Local data persistence
-
-### Development Tools
-- **ESLint** - Code quality and consistency
-- **Prettier** - Code formatting
-- **Git** - Version control with conventional commits
-
----
-
-## Current Features
-
-### ✅ Implemented
-- **Real-time odds integration** with The Odds API
-- **Multi-sport support** (Soccer, Football, Basketball, Hockey, Tennis)
-- **User authentication** with Firebase
-- **Bet selection and management** system
-- **Responsive UI** with modern design
-- **Fallback to mock data** when API is unavailable
-- **Environment variable** configuration for API keys
-
-### 🚧 In Development
-- **AI chat assistant** for sports insights
-- **Advanced statistics** and analytics
-- **Real-time score updates**
-- **Payment integration**
-
----
-
-## Project Structure
+This is a **monorepo** organized as a **modular monolith with clear service boundaries**, designed to split into independent microservices as traffic and team size grow.
 
 ```
-apps/mobile/
-├── src/
-│   ├── components/          # Reusable UI components
-│   │   ├── MatchList/      # Sports match display
-│   │   ├── BetSlip/        # Betting interface
-│   │   └── Header/         # Navigation components
-│   ├── screens/            # Main app screens
-│   │   ├── MainScreen/     # Home screen with sports
-│   │   ├── ProfileScreen/  # User profile management
-│   │   └── BetsScreen/     # Betting history
-│   ├── services/           # API and external services
-│   │   └── oddsApi.ts      # The Odds API integration
-│   ├── hooks/              # Custom React hooks
-│   │   └── useOddsApi.ts   # Sports data fetching
-│   ├── contexts/           # Global state management
-│   │   └── SportsDataContext.tsx
-│   ├── features/           # Feature-specific code
-│   │   ├── auth/          # Authentication
-│   │   └── betting/       # Betting logic
-│   ├── data/              # Mock data and types
-│   │   └── sportsData/    # Sport-specific mock data
-│   └── themes/            # Styling and design system
-├── backend/               # Express.js API server
-│   ├── routes/           # API endpoints
-│   ├── models/           # Database models
-│   └── middleware/       # Authentication middleware
-└── assets/               # Images, fonts, and static files
+project-neptune/
+├── apps/                          # Client applications
+│   └── mobile/                    # React Native mobile app (iOS/Android)
+│
+├── services/                      # Backend services (modular monolith)
+│   ├── api/                       # Main API gateway (Node/TypeScript)
+│   ├── ingestion/                 # Market data ingestion worker
+│   ├── settlement/                # Settlement worker (future)
+│   └── chat-gateway/              # WebSocket chat gateway (future)
+│
+├── packages/                      # Shared packages
+│   ├── types/                     # Shared TypeScript types & interfaces
+│   ├── domain/                    # Domain validators & schemas (Zod)
+│   ├── cache/                     # Shared cache utilities (Redis)
+│   └── ui/                        # Shared UI primitives (future)
+│
+├── infra/                         # Infrastructure & deployment
+│   ├── docker/                    # Dockerfiles & docker-compose
+│   ├── terraform/                 # Infrastructure as Code (future)
+│   └── local/                     # Local dev helpers & seed scripts
+│
+├── docs/                          # System design documentation
+│   ├── 00-project-overview.md
+│   ├── 10-architecture-overview.md
+│   ├── 20-datastores-and-modeling.md
+│   ├── 30-apis-and-contracts.md
+│   ├── ...
+│   └── 170-recommendations-and-tradeoffs.md
+│
+├── ops/                           # Operational documentation
+│   └── runbooks/                  # Incident response runbooks
+│
+├── _misc/                         # Items needing review
+│   └── mobile-backup-*/           # Backup folders
+│
+├── tsconfig.base.json             # Root TypeScript configuration
+├── package.json                   # Root workspace configuration
+├── pnpm-workspace.yaml            # PNPM workspace definition
+└── plan.md                        # Restructuring plan & mapping
 ```
 
 ---
 
-## Setup Instructions
+## 🏗️ Architecture Overview
+
+### Deployment Stance
+
+- **Now**: Modular monolith with clear bounded contexts
+- **Later**: Split into independent services when metrics demand:
+  - Market Data Ingestion
+  - Chat Gateway (WebSocket)
+  - Settlement Worker
+  - Payments Webhook Processor
+
+### Bounded Contexts
+
+| Context | Responsibility |
+|---------|---------------|
+| **Market Data** | Odds/events normalization, Redis cache, WS publish |
+| **Betting** | Slip validation, SGP constraints, idempotent bet creation |
+| **Wallet & Ledger** | Double-entry accounting, holds, credits/debits |
+| **Settlement** | Result resolution, atomic settlement transactions |
+| **Social** | Public profiles, bets feed, follow graph, leaderboards |
+| **Chat** | Event rooms, presence, moderation, trending |
+| **AI & ML** | RAG-based chat, recommendation inference |
+| **Admin/Trading** | Exposure monitoring, market suspensions, audits |
+
+### Technology Stack
+
+- **Frontend**: React Native (Expo), TypeScript
+- **Backend**: Node.js/Express, TypeScript/JavaScript
+- **Databases**: PostgreSQL (transactional truth), Redis (cache/presence)
+- **Storage**: S3/GCS (audit logs, snapshots)
+- **Events**: SQS/SNS (outbox pattern) → Kafka (later)
+- **Observability**: OTel Collector, CloudWatch, Prometheus/Grafana
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn
-- Expo CLI (`npm install -g @expo/cli`)
-- MongoDB (for backend)
+
+- **Node.js** >= 16.0.0
+- **npm** >= 8.0.0 (or **pnpm** recommended)
+- **Docker** & Docker Compose (for local services)
+- **Expo CLI** (for mobile development)
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd Project_Neptune
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/your-org/project-neptune.git
+cd project-neptune
 
-2. **Install dependencies**
-   ```bash
-   cd apps/mobile
-   npm install
-   ```
+# Install dependencies (using pnpm workspaces)
+pnpm install
 
-3. **Set up environment variables**
-   Create a `.env` file in the `apps/mobile` directory:
-   ```bash
-   # The Odds API Configuration
-   ODDS_API_KEY=your_api_key_here
-   ODDS_API_BASE_URL=https://api.the-odds-api.com/v4
-   
-   # Firebase Configuration (if needed)
-   EXPO_PUBLIC_FIREBASE_API_KEY=your_firebase_key
-   EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
-   EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-   ```
+# Or using npm
+npm install
+```
 
-4. **Start the backend server**
-   ```bash
-   cd backend
-   npm install
-   npm start
-   ```
+### Local Development
 
-5. **Start the mobile app**
-   ```bash
-   cd apps/mobile
-   npm start
-   ```
+#### 1. Start Infrastructure Services
 
-6. **Run on device/simulator**
-   - Press `i` for iOS simulator
-   - Press `a` for Android emulator
-   - Scan QR code with Expo Go app
+```bash
+cd infra/docker
+docker-compose up -d
+```
 
-### API Keys Required
-- **The Odds API**: Get your free API key from [the-odds-api.com](https://the-odds-api.com)
-- **Firebase**: Create a project at [firebase.google.com](https://firebase.google.com)
+This starts:
+- PostgreSQL on `localhost:5432`
+- Redis on `localhost:6379`
+- API service on `localhost:3000`
+- Ingestion worker
+
+#### 2. Run Mobile App
+
+```bash
+cd apps/mobile
+npm start
+
+# Press 'i' for iOS simulator
+# Press 'a' for Android emulator
+# Scan QR code with Expo Go app
+```
+
+#### 3. Run API Service (standalone)
+
+```bash
+cd services/api
+npm install
+npm start
+```
+
+### Environment Variables
+
+Create `.env` files in each service directory:
+
+**services/api/.env**:
+```bash
+NODE_ENV=development
+PORT=3000
+DATABASE_URL=postgresql://neptune:neptune_dev_password@localhost:5432/neptune
+REDIS_URL=redis://localhost:6379
+JWT_SECRET=your_jwt_secret
+ODDS_API_KEY=your_odds_api_key
+```
+
+**apps/mobile/.env**:
+```bash
+EXPO_PUBLIC_API_URL=http://localhost:3000
+EXPO_PUBLIC_WS_URL=ws://localhost:3000
+ODDS_API_KEY=your_api_key_here
+EXPO_PUBLIC_FIREBASE_API_KEY=your_firebase_key
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+```
 
 ---
 
-## Development Guidelines
+## 📚 Documentation
+
+Comprehensive system design documentation is available in the [`docs/`](./docs/) directory:
+
+### Core Documentation
+
+- [**00 - Project Overview**](./docs/00-project-overview.md) - Vision, tenets, personas, MVP scope
+- [**10 - Architecture Overview**](./docs/10-architecture-overview.md) - High-level architecture, service boundaries
+- [**20 - Datastores & Modeling**](./docs/20-datastores-and-modeling.md) - Database schemas, Redis patterns
+- [**30 - APIs & Contracts**](./docs/30-apis-and-contracts.md) - REST/WebSocket API specifications
+- [**40 - Odds Ingestion**](./docs/40-odds-ingestion-and-caching.md) - Market data pipeline
+- [**50 - Betting & Settlement**](./docs/50-bet-placement-and-settlement.md) - Bet placement flows
+- [**60 - Payments**](./docs/60-payments.md) - Payment integration (Stripe)
+- [**70 - Social & Leaderboards**](./docs/70-social-public-bets-and-leaderboards.md) - Social features
+- [**80 - Chat & Trending**](./docs/80-chat-and-trending.md) - Chat architecture
+- [**90 - AI & ML**](./docs/90-ai-and-ml.md) - AI chat (RAG) and ML recommendations
+
+### Operations
+
+- [**100 - Observability & SLOs**](./docs/100-observability-and-slos.md) - Metrics, tracing, logging
+- [**110 - Security & Privacy**](./docs/110-security-and-privacy.md) - Auth, secrets, data protection
+- [**120 - Scaling & Capacity**](./docs/120-scaling-and-capacity-planning.md) - Scaling strategies
+- [**130 - Deployment & Operations**](./docs/130-deployment-and-operations.md) - CI/CD, environments
+- [**140 - Testing & Quality**](./docs/140-testing-and-quality.md) - Testing strategy
+- [**150 - Runbooks**](./docs/150-runbooks.md) - Operational runbooks index
+- [**160 - Roadmap**](./docs/160-roadmap.md) - Product roadmap
+- [**170 - Recommendations**](./docs/170-recommendations-and-tradeoffs.md) - Design decisions
+
+### Runbooks
+
+Operational runbooks for incident response:
+
+- [Price Drift / Odds Stale](./ops/runbooks/price-drift.md)
+- [Redis Outage](./ops/runbooks/redis-outage.md)
+- [Payments Webhook Delay](./ops/runbooks/payments-webhook-delay.md)
+- [Chat Flooding/Abuse](./ops/runbooks/chat-flooding.md)
+
+### Additional Resources
+
+- [**AI Page Design**](./docs/ai-page-design.md) - AI page specification
+- [**Architecture Reference**](./docs/architecture-reference.md) - Microservices reference doc
+- [**Restructuring Plan**](./plan.md) - Repository restructuring details
+
+---
+
+## 🛠️ Development Workflow
+
+### Monorepo Commands
+
+```bash
+# Typecheck all packages
+npm run typecheck
+
+# Start mobile app
+npm run mobile
+
+# Start API service
+npm run api
+
+# Start ingestion worker
+npm run ingestion
+
+# Clean all node_modules
+npm run clean
+```
+
+### Working with Packages
+
+Shared packages can be imported using path aliases:
+
+```typescript
+// Import shared types
+import { MatchType, BetType } from '@neptune/types';
+
+// Import domain validators
+import { validateBet } from '@neptune/domain';
+
+// Import cache utilities
+import { cacheService } from '@neptune/cache';
+```
 
 ### Code Style
+
 - Use **TypeScript** for all new code
 - Follow **conventional commits** format
 - Use **functional components** with hooks
 - Implement **proper error handling**
 
 ### Commit Message Format
+
 ```bash
-git commit -m "feat: add new betting feature"
-git commit -m "fix: resolve API integration issue"
-git commit -m "docs: update setup instructions"
+git commit -m "feat(api): add bet placement endpoint"
+git commit -m "fix(mobile): resolve odds display issue"
+git commit -m "docs: update architecture overview"
+git commit -m "chore(infra): update docker-compose"
 ```
 
-### Data Flow
-1. **API Service** (`oddsApi.ts`) fetches data from The Odds API
-2. **Custom Hooks** (`useOddsApi.ts`) manage data state and caching
-3. **Context** (`SportsDataContext.tsx`) provides data to components
-4. **Components** display data with proper loading states
-
-### Error Handling
-- **API failures** fall back to mock data
-- **Network issues** show user-friendly messages
-- **Loading states** provide feedback during data fetching
-
 ---
 
-## API Integration
+## 🧪 Testing
 
-### The Odds API
-We integrate with [The Odds API](https://the-odds-api.com) for real-time sports data:
+```bash
+# Run unit tests
+npm test
 
-- **Live odds** for multiple sports and bookmakers
-- **Upcoming events** with detailed match information
-- **Score updates** for completed games
-- **Multiple markets** (moneyline, spreads, totals)
+# Run integration tests
+npm run test:integration
 
-### Data Mapping
-We map API responses to our internal data structure:
-```typescript
-interface MatchType {
-  id: string;
-  league: string;
-  date: string;
-  homeTeam: { name: string; odds: string };
-  awayTeam: { name: string; odds: string };
-  tieOdds?: string;
-}
+# Run E2E tests
+npm run test:e2e
 ```
 
-### ML Data Sources (Future)
-- **Historical Odds Data**: Past betting lines and outcomes
-- **Team Performance Metrics**: Win/loss records, scoring averages, defensive stats
-- **Player Statistics**: Individual performance data, injury reports
-- **Weather Data**: Impact on outdoor sports performance
-- **Market Movement**: How odds change leading up to games
-- **User Betting Patterns**: Anonymous betting behavior analysis
+---
 
-### Supported Sports
-- **Soccer**: Premier League, La Liga, Serie A, Bundesliga
-- **Football**: NFL, NCAA Football
-- **Basketball**: NBA, NCAA Basketball
-- **Hockey**: NHL
-- **Tennis**: ATP, WTA
+## 🚢 Deployment
 
-### Future ML Infrastructure
-- **Data Pipeline**: Historical odds, team statistics, player performance data
-- **Model Training**: Python-based ML models with TensorFlow/PyTorch
-- **Real-time Inference**: API endpoints for live bet recommendations
-- **Model Monitoring**: Track prediction accuracy and model performance
-- **A/B Testing**: Compare different ML models for optimal recommendations
+### Development
+
+```bash
+cd infra/docker
+docker-compose up -d
+```
+
+### Production
+
+```bash
+cd infra/docker
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+### Cloud Deployment (Future)
+
+```bash
+cd infra/terraform/environments/prod
+terraform init
+terraform apply
+```
 
 ---
 
-## Roadmap
+## 🗺️ Roadmap
 
-### Phase 1: Core Platform (Current)
-- ✅ Real-time odds integration
-- ✅ User authentication
-- ✅ Basic betting interface
-- ✅ Multi-sport support
+### Phase 1: Foundations ✅
+- Schemas + idempotent bets & settlement
+- Redis odds cache
+- Outbox events
+- CI/CD & observability baseline
 
-### Phase 2: AI Enhancement (Next)
-- 🤖 **AI Chat Assistant**
-  - Natural language queries about sports data
-  - Statistical analysis and insights
-  - Personalized recommendations
-  - Historical performance analysis
+### Phase 2: Realtime & Social 🚧
+- WebSocket fanout
+- Chat rooms + trending
+- Public bets, follows, leaderboards
 
-- 📊 **Advanced Analytics**
-  - Team and player statistics
-  - Head-to-head analysis
-  - Trend identification
-  - Risk assessment tools
+### Phase 3: Payments & Ops
+- Stripe deposits/withdrawals
+- Admin/trading tools
+- Exposure limits
 
-- 🧠 **Machine Learning Bet Recommendations**
-  - **Smart Bet Suggestions**: ML models analyze historical data to suggest optimal bets
-  - **Value Bet Detection**: Identify when bookmaker odds are favorable vs. statistical probability
-  - **Risk Assessment**: Calculate bet risk levels based on team performance, injuries, and trends
-  - **Popular Bet Analysis**: Track and analyze most common bets and their success rates
-  - **Personalized Recommendations**: Learn from user betting history to suggest relevant bets
-  - **Live Model Updates**: Continuously update predictions based on real-time game data
+### Phase 4: Intelligence
+- AI chat (RAG) hardening
+- ML recommendations MVP
+- Analytics pipeline
 
-### Phase 3: Advanced Features
-- 💳 **Payment Integration**
-  - Secure payment processing
-  - Multiple payment methods
-  - Transaction history
-
-- 📱 **Enhanced Mobile Experience**
-  - Push notifications for live events
-  - Offline mode with cached data
-  - Performance optimizations
-
-### Phase 4: Scale & Polish
-- 🚀 **Production Deployment**
-  - Cloud infrastructure setup
-  - Monitoring and analytics
-  - Performance optimization
-
-- 🔒 **Security & Compliance**
-  - Advanced security measures
-  - Regulatory compliance
-  - Data protection
+### Phase 5: Scale & Services
+- Split services (Ingestion, Chat, Settlement)
+- Kafka event bus
+- Multi-region prep
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 ### Getting Started
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
 4. Test thoroughly
 5. Submit a pull request
 
-### Development Workflow
-1. **Plan**: Create an issue describing the feature/fix
-2. **Code**: Implement with proper testing
-3. **Review**: Self-review before submitting PR
-4. **Test**: Ensure all features work as expected
-5. **Document**: Update documentation if needed
+### Development Guidelines
 
-### Code Review Guidelines
-- **Functionality**: Does the code work as intended?
-- **Performance**: Are there any performance implications?
-- **Security**: Are there any security concerns?
-- **Maintainability**: Is the code easy to understand and maintain?
+- **Plan**: Create an issue describing the feature/fix
+- **Code**: Implement with proper testing
+- **Review**: Self-review before submitting PR
+- **Test**: Ensure all features work as expected
+- **Document**: Update documentation if needed
 
 ---
 
-## Support & Resources
+## 📄 License
 
-- **API Documentation**: [The Odds API Docs](https://the-odds-api.com/docs)
-- **React Native**: [Official Documentation](https://reactnative.dev)
-- **Expo**: [Development Tools](https://docs.expo.dev)
-- **Firebase**: [Authentication Guide](https://firebase.google.com/docs/auth)
+This project is proprietary and unlicensed. All rights reserved.
 
 ---
 
-## Mouhamed Mbengue
+## 👥 Team
+
+**Neptune Engineering Team**
+
+For questions or support, contact: [support@neptune.example.com](mailto:support@neptune.example.com)
+
+---
+
+## 🙏 Acknowledgments
+
+- [The Odds API](https://the-odds-api.com) - Live sports odds data
+- [OpenAI](https://openai.com) - AI chat assistance
+- React Native & Expo communities
+
+---
+
+_Last updated: October 6, 2025_

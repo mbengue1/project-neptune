@@ -1,0 +1,38 @@
+# Multi-stage Dockerfile for Neptune API service
+
+# Stage 1: Base
+FROM node:20-alpine AS base
+WORKDIR /app
+RUN apk add --no-cache libc6-compat
+
+# Stage 2: Dependencies
+FROM base AS deps
+COPY services/api/package*.json ./
+RUN npm ci --only=production
+
+# Stage 3: Build (if needed for TypeScript)
+FROM base AS builder
+COPY services/api/ ./
+COPY packages/ ../packages/
+COPY tsconfig.base.json ../
+RUN npm ci
+# RUN npm run build  # Uncomment when TS build is set up
+
+# Stage 4: Runtime
+FROM base AS runner
+ENV NODE_ENV production
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 neptune
+
+# Copy dependencies
+COPY --from=deps --chown=neptune:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=neptune:nodejs /app/src ./src
+
+USER neptune
+EXPOSE 3000
+ENV PORT 3000
+
+CMD ["node", "src/server.js"]

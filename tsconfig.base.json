@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "esnext",
+    "lib": ["ES2020"],
+    "jsx": "react-native",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@neptune/types": ["packages/types/src"],
+      "@neptune/types/*": ["packages/types/src/*"],
+      "@neptune/domain": ["packages/domain/src"],
+      "@neptune/domain/*": ["packages/domain/src/*"],
+      "@neptune/cache": ["packages/cache/src"],
+      "@neptune/cache/*": ["packages/cache/src/*"],
+      "@neptune/ui": ["packages/ui/src"],
+      "@neptune/ui/*": ["packages/ui/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "**/node_modules", "**/.expo", "**/.expo-shared", "**/dist", "**/build"]
+}

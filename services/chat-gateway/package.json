@@ -1,0 +1,17 @@
+{
+  "name": "@neptune/chat-gateway",
+  "version": "1.0.0",
+  "description": "WebSocket chat gateway for Neptune",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@neptune/cache": "*",
+    "@neptune/types": "*",
+    "ws": "^8.16.0",
+    "express-rate-limit": "^7.1.5",
+    "dotenv": "^16.4.7"
+  },
+  "private": true
+}

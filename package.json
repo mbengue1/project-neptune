@@ -1,0 +1,31 @@
+{
+  "name": "neptune-monorepo",
+  "version": "1.0.0",
+  "description": "Neptune - AI-Enhanced Sports Betting Platform",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "tsc --build tsconfig.base.json",
+    "mobile": "cd apps/mobile && npm start",
+    "api": "cd services/api && npm start",
+    "ingestion": "cd services/ingestion && npm start",
+    "clean": "rm -rf node_modules apps/*/node_modules services/*/node_modules packages/*/node_modules"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mbengue1/project-neptune.git"
+  },
+  "author": "Neptune Team",
+  "license": "UNLICENSED"
+}
